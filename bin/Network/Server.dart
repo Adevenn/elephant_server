@@ -95,6 +95,7 @@ class Server{
     try{
       await database.testConnection();
       await socket.writeAsym('success');
+      print('success');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('databaseTimeout');
@@ -156,6 +157,7 @@ class Server{
       var cell = Cell.fromJson(jsonObj);
       database.addCell(cell.title, cell.subtitle, cell.type);
       await socket.writeAsym('success');
+      print('success');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
@@ -200,6 +202,8 @@ class Server{
               throw Exception('Incorrect element type');
           }
       }
+      await socket.writeAsym('success');
+      print('success');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
@@ -243,6 +247,7 @@ class Server{
           throw Exception('Wrong object type');
       }
       await socket.writeAsym('success');
+      print('success');
     }
     catch(e){
       await socket.writeAsym('failed');
@@ -287,6 +292,7 @@ class Server{
           throw Exception('Wrong object type');
       }
       await socket.writeAsym('success');
+      print('success');
     } catch(e){
       await socket.writeAsym('failed');
       print('(Server)_updateObject:\n$e');
@@ -298,9 +304,9 @@ class Server{
   ///and each item in the list must be jsonDecode to recreate the object
   String listToJson(var list){
     var json = <String>[];
-    print('List :');
+    //print('List :');
     for(var i = 0; i < list.length; i++){
-      print(list[i].toJson());
+      //print(list[i].toJson());
       json.add(jsonEncode(list[i]));
     }
     return jsonEncode(json);
