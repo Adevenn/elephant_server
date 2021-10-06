@@ -3,7 +3,10 @@ import 'dart:io';
 import '../Network/Server.dart';
 
 void main(List<String> args) {
-  const patternArgs = 'Arguments must have this syntax :\nipServer portServer ipDatabase portDatabase\nip format: 127.0.0.1\nport format: a number between 0-65535';
+  const patternArgs = '''Arguments must have this syntax :
+  ipServer portServer ipDatabase portDatabase
+  ip format: 127.0.0.1
+  port format: a number between 0-65535''';
   if(args.length != 4 || !isArgsValid(args)){
     print(patternArgs);
     exit(0);

@@ -175,8 +175,10 @@ class Server{
   Future<void> _addObject(SocketCustom socket, Database database) async{
     try{
       var type = await socket.readAsym();
+      print('type: $type');
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readSym());
+
       switch(type){
         case 'Sheet':
           var sheet = Sheet.fromJson(jsonDecode(json));
