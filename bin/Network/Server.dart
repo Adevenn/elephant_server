@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:async/async.dart';
-
 import '../Exception/HelloWordException.dart';
 import '../Model/Cell.dart';
 import '../Model/Elements/CheckBox.dart';
@@ -11,9 +9,7 @@ import '../Model/Elements/Element.dart';
 import '../Model/Elements/Images.dart';
 import '../Model/Elements/Texts.dart';
 import '../Model/Sheet.dart';
-import 'CustomSocket.dart';
-import 'Encryption/AsymEncryption.dart';
-import 'Encryption/SymEncryption.dart';
+import 'SocketCustom.dart';
 import 'Database.dart';
 
 
@@ -36,7 +32,7 @@ class Server{
 
   void _handleClient(Socket _socket) async{
     print('/* New client connection */');
-    var socket = CustomSocket(_socket, _ipDatabase, _portDatabase);
+    var socket = SocketCustom(_socket, _ipDatabase, _portDatabase);
     try{
       var database = await socket.setup();
       await _handleRequest(socket, database);
@@ -48,7 +44,7 @@ class Server{
     print('Client disconnected');
   }
 
-  Future<void> _handleRequest(CustomSocket socket, Database database) async{
+  Future<void> _handleRequest(SocketCustom socket, Database database) async{
     try{
       var request = await socket.readAsym();
       await socket.synchronizeWrite();
@@ -91,7 +87,7 @@ class Server{
   }
 
   ///Try to connect to [database]
-  Future<void> _testConnection(CustomSocket socket, Database database) async{
+  Future<void> _testConnection(SocketCustom socket, Database database) async{
     try{
       await database.testConnection();
       await socket.writeAsym('success');
@@ -111,7 +107,7 @@ class Server{
   ///Get cells from [database] and send it to client with [socket]
   ///
   /// Each cell is convert to json and encrypted
-  Future<void> _cells(CustomSocket socket, Database database) async {
+  Future<void> _cells(SocketCustom socket, Database database) async {
     try{
       var matchWord = await socket.readAsym();
       var cells = await database.selectCells(matchWord);
@@ -124,7 +120,7 @@ class Server{
   }
 
   ///Get the cell content from [database]
-  Future<void> _cellContent(CustomSocket socket, Database database) async {
+  Future<void> _cellContent(SocketCustom socket, Database database) async {
     try{
       var idCell = int.parse(await socket.readAsym());
       var sheets = await database.selectCellContent(idCell);
@@ -137,7 +133,7 @@ class Server{
   }
 
   ///Get the sheet content from [database]
-  Future<void> _sheetContent(CustomSocket socket, Database database) async{
+  Future<void> _sheetContent(SocketCustom socket, Database database) async{
     try{
       var idSheet = int.parse(await socket.readAsym());
       var elements = await database.selectSheetContent(idSheet);
@@ -151,7 +147,7 @@ class Server{
 
   ///Receive a json containing a Cell
   ///Call [database] to add this Cell
-  Future<void> _addCell(CustomSocket socket, Database database) async{
+  Future<void> _addCell(SocketCustom socket, Database database) async{
     try{
       var jsonObj = jsonDecode(await socket.readSym());
       var cell = Cell.fromJson(jsonObj);
@@ -176,7 +172,7 @@ class Server{
 
   ///Receive a type and a json
   ///Call the [database] to add the jsonObject
-  Future<void> _addObject(CustomSocket socket, Database database) async{
+  Future<void> _addObject(SocketCustom socket, Database database) async{
     try{
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
@@ -222,7 +218,7 @@ class Server{
 
   ///Receive a type and an index
   ///Call the [database] to delete the matching object
-  Future<void> _deleteObject(CustomSocket socket, Database database) async{
+  Future<void> _deleteObject(SocketCustom socket, Database database) async{
     try{
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
@@ -257,7 +253,7 @@ class Server{
 
   ///Receive a type and a json
   ///Call [database] to update the jsonObject
-  Future<void> _updateObject(CustomSocket socket, Database database) async{
+  Future<void> _updateObject(SocketCustom socket, Database database) async{
     try{
       var type = await socket.readAsym();
       await socket.synchronizeWrite();

@@ -7,7 +7,7 @@ import 'Database.dart';
 import 'Encryption/AsymEncryption.dart';
 import 'Encryption/SymEncryption.dart';
 
-class CustomSocket{
+class SocketCustom{
 
   final Socket _socket;
   late final AsymEncryption _asym;
@@ -18,7 +18,7 @@ class CustomSocket{
   final int _portDatabase;
   static const String _HELLO_WORD = 'HelloHackerMan';
 
-  CustomSocket(this._socket, this._ipDatabase, this._portDatabase){
+  SocketCustom(this._socket, this._ipDatabase, this._portDatabase){
     _asym = AsymEncryption();
     _queue = StreamQueue(_socket);
   }

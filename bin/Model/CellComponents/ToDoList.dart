@@ -1,4 +1,3 @@
-import '../Elements/CheckBox.dart';
 import '../Elements/Element.dart';
 import '../Sheet.dart';
 
