@@ -147,8 +147,15 @@ class Database{
       }
       await _initConnection();
       await _connection.query("INSERT INTO cell (title, subtitle, type) VALUES ('$title', '$subtitle', $typeInt);");
+      var idCellRaw = await _connection.query("SELECT id FROM cell WHERE cell.title = '$title';");
+      var idCell;
+      for(final id in idCellRaw) {
+        idCell = id[0] as int;
+      }
+      print(idCell);
+      await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)addCell: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)addCell: Connection lost\n$e'); }
   }
 
   void addSheet(int idCell, String title, String subtitle, int idOrder) async{
