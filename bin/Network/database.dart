@@ -3,16 +3,16 @@ import 'dart:typed_data';
 
 import 'package:postgres/postgres.dart';
 
-import '../Model/Cell.dart';
-import '../Model/CellComponents/Book.dart';
-import '../Model/CellComponents/Ranking.dart';
-import '../Model/CellComponents/ToDoList.dart';
-import '../Model/Elements/CheckBox.dart';
-import '../Model/Elements/Element.dart';
-import '../Model/Elements/Images.dart';
-import '../Model/Elements/TextType.dart';
-import '../Model/Elements/Texts.dart';
-import '../Model/Sheet.dart';
+import '../Model/cell.dart';
+import '../Model/CellComponents/book.dart';
+import '../Model/CellComponents/ranking.dart';
+import '../Model/CellComponents/to_do_list.dart';
+import '../Model/Elements/checkbox.dart';
+import '../Model/Elements/element.dart';
+import '../Model/Elements/images.dart';
+import '../Model/Elements/text_type.dart';
+import '../Model/Elements/texts.dart';
+import '../Model/sheet.dart';
 
 class Database{
   late PostgreSQLConnection _connection;

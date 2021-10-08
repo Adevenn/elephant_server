@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../Network/Server.dart';
+import '../Network/server.dart';
 
 void main(List<String> args) {
   const patternArgs = '''Arguments must have this syntax :

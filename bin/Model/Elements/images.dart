@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'Element.dart';
+import 'element.dart';
 
 class Images extends Element{
   Uint8List data;

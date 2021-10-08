@@ -1,9 +1,9 @@
-import '../Model/CellComponents/Ranking.dart';
-import '../Model/CellComponents/ToDoList.dart';
+import '../Model/CellComponents/ranking.dart';
+import '../Model/CellComponents/to_do_list.dart';
 
-import 'CellComponents/Book.dart';
-import 'Elements/Element.dart';
-import 'Sheet.dart';
+import 'CellComponents/book.dart';
+import 'Elements/element.dart';
+import 'sheet.dart';
 
 abstract class Cell{
   final int id;

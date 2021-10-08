@@ -1,6 +1,6 @@
-import '../Elements/Element.dart';
-import '../Sheet.dart';
-import '../Cell.dart';
+import '../Elements/element.dart';
+import '../sheet.dart';
+import '../cell.dart';
 
 class Book extends Cell{
   int sheetSelect = 0;

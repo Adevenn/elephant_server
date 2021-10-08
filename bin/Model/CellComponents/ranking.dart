@@ -1,6 +1,6 @@
-import '../Sheet.dart';
+import '../sheet.dart';
 
-import '../Cell.dart';
+import '../cell.dart';
 
 class Ranking extends Cell{
 

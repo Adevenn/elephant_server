@@ -1,4 +1,4 @@
-import 'Element.dart';
+import 'element.dart';
 
 class CheckBox extends Element{
   bool isChecked;

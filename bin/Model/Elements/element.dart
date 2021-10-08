@@ -1,7 +1,7 @@
-import 'CheckBox.dart';
-import 'Images.dart';
-import 'Texts.dart';
-import 'TextType.dart';
+import 'checkbox.dart';
+import 'images.dart';
+import 'texts.dart';
+import 'text_type.dart';
 
 abstract class Element{
   final int id;

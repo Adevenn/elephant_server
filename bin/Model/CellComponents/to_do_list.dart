@@ -1,7 +1,7 @@
-import '../Elements/Element.dart';
-import '../Sheet.dart';
+import '../Elements/element.dart';
+import '../sheet.dart';
 
-import '../Cell.dart';
+import '../cell.dart';
 
 class ToDoList extends Cell{
 

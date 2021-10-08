@@ -1,5 +1,5 @@
-import 'Element.dart';
-import 'TextType.dart';
+import 'element.dart';
+import 'text_type.dart';
 
 class Texts extends Element{
   String text;
