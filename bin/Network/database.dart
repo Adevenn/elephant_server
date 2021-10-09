@@ -163,7 +163,9 @@ class Database{
       await _initConnection();
       await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, '$title', '$subtitle', $idOrder);");
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)addSheet: Connection lost'); }
+    }
+    on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
+    catch(e) { throw DatabaseException('(Database)addSheet: Connection lost'); }
   }
 
   void addCheckBox(String text, bool isCheck, int idParent, int idOrder) async{

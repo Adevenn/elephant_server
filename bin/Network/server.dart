@@ -114,8 +114,8 @@ class Server{
       await socket.writeSym(listToJson(cells));
     }
     on SocketException{ print('(Server)_cells: Client disconnected'); }
-    on DatabaseException catch(e) { print('(Server)_testConnection:\n${e.toString()}'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_testConnection:\n${e.toString()}'); }
+    on DatabaseException catch(e) { print('(Server)_cells:\n${e.toString()}'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_cells:\n${e.toString()}'); }
     catch(e) { throw Exception('(Server)_cells:\n$e'); }
   }
 
@@ -157,16 +157,16 @@ class Server{
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n${e.toString()}');
+      print('(Server)_addCell:\n${e.toString()}');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n${e.toString()}');
+      print('(Server)_addCell:\n${e.toString()}');
     }
-    on SocketException{ print('(Server)_testConnection: Connection lost with '); }
+    on SocketException{ print('(Server)_addCell: Connection lost with '); }
     catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n$e');
+      print('(Server)_addCell:\n$e');
     }
   }
 
@@ -205,16 +205,16 @@ class Server{
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n${e.toString()}');
+      print('(Server)_addObject:\n${e.toString()}');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n${e.toString()}');
+      print('(Server)_addObject:\n${e.toString()}');
     }
-    on SocketException{ print('(Server)_testConnection: Connection lost with '); }
+    on SocketException{ print('(Server)_addObject: Connection lost with '); }
     catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n$e');
+      print('(Server)_addObject:\n$e');
     }
   }
 
