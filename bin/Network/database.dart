@@ -148,11 +148,7 @@ class Database{
       await _initConnection();
       await _connection.query("INSERT INTO cell (title, subtitle, type) VALUES ('$title', '$subtitle', $typeInt);");
       var idCellRaw = await _connection.query("SELECT id FROM cell WHERE cell.title = '$title';");
-      var idCell;
-      for(final id in idCellRaw) {
-        idCell = id[0] as int;
-      }
-      print(idCell);
+      var idCell = idCellRaw[0][0] as int;
       await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addCell: Connection lost\n$e'); }
@@ -205,7 +201,13 @@ class Database{
   void deleteSheet(int index) async{
     try{
       await _initConnection();
+      var idCellRaw = await _connection.query("SELECT idcell FROM sheet WHERE id = '$index';");
+      var idCell = idCellRaw[0][0] as int;
       await _connection.query('DELETE FROM sheet WHERE id = $index;');
+      var sheets = await _connection.query('SELECT * FROM sheet WHERE idcell = $idCell;');
+      if(sheets.isEmpty){
+       await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
+      }
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost'); }
   }
