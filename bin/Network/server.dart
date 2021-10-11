@@ -175,30 +175,27 @@ class Server{
   Future<void> _addObject(SocketCustom socket, Database database) async{
     try{
       var type = await socket.readAsym();
-      print('type: $type');
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readSym());
-
       switch(type){
         case 'Sheet':
           var sheet = Sheet.fromJson(jsonDecode(json));
           database.addSheet(sheet.idParent, sheet.title, sheet.subtitle, sheet.idOrder);
           break;
-        case 'Element':
+        case 'CheckBox':
           var element = Element.fromJson(jsonDecode(json));
-          switch(element.runtimeType.toString()){
-            case 'CheckBox':
-              database.addCheckBox((element as CheckBox).text, element.isChecked, element.idParent, element.idOrder);
-              break;
-            case 'Images':
-              database.addImage((element as Images).data, element.idParent, element.idOrder);
-              break;
-            case 'Texts':
-              database.addTexts((element as Texts).text, element.txtType.index, element.idParent, element.idOrder);
-              break;
-            default:
-              throw Exception('Incorrect element type');
-          }
+          database.addCheckBox((element as CheckBox).text, element.isChecked, element.idParent, element.idOrder);
+          break;
+        case 'Images':
+          var element = Element.fromJson(jsonDecode(json));
+          database.addImage((element as Images).data, element.idParent, element.idOrder);
+          break;
+        case 'Texts':
+          var element = Element.fromJson(jsonDecode(json));
+          database.addTexts((element as Texts).text, element.txtType.index, element.idParent, element.idOrder);
+          break;
+        default:
+          throw Exception('(Server)_addObject: Wrong type -> $type');
       }
       await socket.writeAsym('success');
       print('success');
@@ -270,21 +267,17 @@ class Server{
           var sheet = Sheet.fromJson(json);
           database.updateSheet(sheet.id, sheet.title, sheet.subtitle, sheet.idOrder);
           break;
-        case 'Element':
+        case 'CheckBox':
           var elem = Element.fromJson(json);
-          switch(elem.runtimeType.toString()){
-            case 'CheckBox':
-              database.updateCheckBox((elem as CheckBox).id, elem.isChecked, elem.text, elem.idOrder);
-              break;
-            case 'Images':
-              database.updateImage((elem as Images).id, elem.data, elem.idOrder);
-              break;
-            case 'Texts':
-              database.updateTexts((elem as Texts).id, elem.text, elem.txtType.index, elem.idOrder);
-              break;
-            default:
-              throw Exception('Incorrect element type');
-          }
+          database.updateCheckBox((elem as CheckBox).id, elem.isChecked, elem.text, elem.idOrder);
+          break;
+        case 'Images':
+          var elem = Element.fromJson(json);
+          database.updateImage((elem as Images).id, elem.data, elem.idOrder);
+          break;
+        case 'Texts':
+          var elem = Element.fromJson(json);
+          database.updateTexts((elem as Texts).id, elem.text, elem.txtType.index, elem.idOrder);
           break;
         default:
           throw Exception('Wrong object type');
