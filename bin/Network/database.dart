@@ -164,46 +164,46 @@ class Database{
     catch(e) { throw DatabaseException('(Database)addSheet: Connection lost'); }
   }
 
-  void addCheckBox(String text, bool isCheck, int idParent, int idOrder) async{
+  void addCheckBox(String text, bool isCheck, int idSheet, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("INSERT INTO checkbox (text, ischeck, idparent, idorder) VALUES ('$text', $isCheck, $idParent, $idOrder);");
+      await _connection.query("INSERT INTO checkbox (text, ischeck, idparent, idorder) VALUES ('$text', $isCheck, $idSheet, $idOrder);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost'); }
   }
 
-  void addImage(Uint8List data, int idParent, int idOrder) async{
+  void addImage(Uint8List data, int idSheet, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query('INSERT INTO image (data, parent, idorder) VALUES ($data, $idParent, $idOrder);');
+      await _connection.query('INSERT INTO image (data, parent, idorder) VALUES ($data, $idSheet, $idOrder);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addImage: Connection lost'); }
   }
 
-  void addTexts(String text, int type, int idParent, int idOrder) async{
+  void addTexts(String text, int type, int idSheet, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("INSERT INTO texts (text, type, idparent, idorder) VALUES ('$text', $type, $idParent, $idOrder);");
+      await _connection.query("INSERT INTO texts (text, type, idparent, idorder) VALUES ('$text', $type, $idSheet, $idOrder);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addTexts: Connection lost'); }
   }
 
   /// DELETE ///
 
-  void deleteCell(int index) async{
+  void deleteCell(int idCell) async{
     try{
       await _initConnection();
-      await _connection.query('DELETE FROM cell WHERE id = $index;');
+      await _connection.query('DELETE FROM cell WHERE id = $idCell;');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteCell: Connection lost'); }
   }
 
-  void deleteSheet(int index) async{
+  void deleteSheet(int idSheet) async{
     try{
       await _initConnection();
-      var idCellRaw = await _connection.query("SELECT idcell FROM sheet WHERE id = '$index';");
+      var idCellRaw = await _connection.query("SELECT idcell FROM sheet WHERE id = '$idSheet';");
       var idCell = idCellRaw[0][0] as int;
-      await _connection.query('DELETE FROM sheet WHERE id = $index;');
+      await _connection.query('DELETE FROM sheet WHERE id = $idSheet;');
       var sheets = await _connection.query('SELECT * FROM sheet WHERE idcell = $idCell;');
       if(sheets.isEmpty){
        await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
@@ -212,26 +212,26 @@ class Database{
     } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost'); }
   }
 
-  void deleteCheckBox(int index) async{
+  void deleteCheckBox(int idCheckbox) async{
     try{
       await _initConnection();
-      await _connection.query('DELETE FROM checkbox WHERE id = $index;');
+      await _connection.query('DELETE FROM checkbox WHERE id = $idCheckbox;');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteCheckbox: Connection lost'); }
   }
 
-  void deleteImage(int index) async{
+  void deleteImage(int idImage) async{
     try{
       await _initConnection();
-      await _connection.query('DELETE FROM image WHERE id = $index;');
+      await _connection.query('DELETE FROM image WHERE id = $idImage;');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteImage: Connection lost'); }
   }
 
-  void deleteTexts(int index) async{
+  void deleteTexts(int idTexts) async{
     try{
       await _initConnection();
-      await _connection.query('DELETE FROM texts WHERE id = $index;');
+      await _connection.query('DELETE FROM texts WHERE id = $idTexts;');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteTexts: Connection lost'); }
   }
