@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 
-import '../Exception/hello_word_exception.dart';
 import '../Model/cell.dart';
 import '../Model/Elements/checkbox.dart';
 import '../Model/Elements/element.dart';
 import '../Model/Elements/images.dart';
 import '../Model/Elements/texts.dart';
 import '../Model/sheet.dart';
+import 'Encryption/asym_encryption.dart';
 import 'socket_custom.dart';
 import 'database.dart';
 
@@ -16,6 +16,7 @@ import 'database.dart';
 class Server{
   final String _ipServer;
   final int _portServer;
+  final AsymEncryption _asym = AsymEncryption();
   final String _ipDatabase;
   final int _portDatabase;
 
@@ -32,83 +33,72 @@ class Server{
 
   void _handleClient(Socket _socket) async{
     print('/* New client connection */');
-    var socket = SocketCustom(_socket, _ipDatabase, _portDatabase);
+    var socket = SocketCustom(_socket, _asym, _ipDatabase, _portDatabase);
     try{
-      var database = await socket.setup();
-      await _handleRequest(socket, database);
-    }
-    on HelloWordException catch(e){ print(e); }
-    on SocketException catch(e){ print('(Server)_handleClient :\n${e.toString()}'); }
-    catch(e){ print('(Server)_handleClient:\n$e'); }
-    await socket.disconnect();
-    print('Client disconnected');
-  }
-
-  Future<void> _handleRequest(SocketCustom socket, Database database) async{
-    try{
-      var request = await socket.readAsym();
-      await socket.synchronizeWrite();
-      print('Request : $request');
-
+      var request = await socket.read();
+      print(request);
       switch(request){
-        case 'testConnection':
-          await _testConnection(socket, database);
+        case 'init':
+          await _init(socket);
           break;
         case 'cells':
-          await _cells(socket, database);
+          await _cells(socket);
           break;
         case 'cellContent':
-          await _cellContent(socket, database);
+          await _cellContent(socket);
           break;
         case 'sheetContent':
-          await _sheetContent(socket, database);
+          await _sheetContent(socket);
           break;
         case 'addCell':
-          await _addCell(socket, database);
+          await _addCell(socket);
           break;
         case 'addObject':
-          await _addObject(socket, database);
+          await _addObject(socket);
           break;
         case 'deleteObject':
-          await _deleteObject(socket, database);
+          await _deleteObject(socket);
           break;
         case 'updateObject':
-          await _updateObject(socket, database);
+          await _updateObject(socket);
           break;
         default:
           print('No server request match with client request');
           break;
       }
     }
-    on DatabaseException catch(e){ print('(Server)_handleRequest:\n$e'); }
-    on DatabaseTimeoutException catch(e){ print('(Server)_handleRequest:\n$e'); }
-    on SocketException catch(e){ throw SocketException('(Server)_handleRequest:\n$e'); }
-    catch(e) { throw Exception('(Server)_handleRequest:\n$e'); }
+    on DatabaseException catch(e){ print('(Server)_handleClient:\n$e'); }
+    on DatabaseTimeoutException catch(e){ print('(Server)_handleClient:\n$e'); }
+    on SocketException catch(e){ throw SocketException('(Server)_handleClient:\n$e'); }
+    catch(e) { throw Exception('(Server)_handleClient:\n$e'); }
+    await socket.disconnect();
+    print('Client disconnected');
   }
 
-  ///Try to connect to [database]
-  Future<void> _testConnection(SocketCustom socket, Database database) async{
+  ///Try to connect to database
+  Future<void> _init(SocketCustom socket) async{
     try{
+      var database = await socket.init();
       await database.testConnection();
-      await socket.writeAsym('success');
-      print('success');
+      await socket.write('success');
     }
     on DatabaseTimeoutException catch(e){
-      await socket.writeAsym('databaseTimeout');
-      print('(Server)_testConnection:\n${e.toString()}');
+      await socket.write('databaseTimeout');
+      print('(Server)_init:\n$e');
     }
-    on SocketException{ print('(Server)_testConnection: Connection lost with '); }
+    on SocketException{ print('(Server)_init: Connection lost with '); }
     catch(e){
-      await socket.writeAsym('failed');
-      print('(Server)_testConnection:\n$e');
+      await socket.write('failed');
+      print('(Server)_init:\n$e');
     }
   }
 
-  ///Get cells from [database] and send it to client with [socket]
+  ///Get cells from database and send it to client with [socket]
   ///
   /// Each cell is convert to json and encrypted
-  Future<void> _cells(SocketCustom socket, Database database) async {
+  Future<void> _cells(SocketCustom socket) async {
     try{
+      var database = await socket.setup();
       var matchWord = await socket.readAsym();
       var cells = await database.selectCells(matchWord);
       await socket.writeSym(listToJson(cells));
@@ -119,9 +109,10 @@ class Server{
     catch(e) { throw Exception('(Server)_cells:\n$e'); }
   }
 
-  ///Get the cell content from [database]
-  Future<void> _cellContent(SocketCustom socket, Database database) async {
+  ///Get the cell content from database
+  Future<void> _cellContent(SocketCustom socket) async {
     try{
+      var database = await socket.setup();
       var idCell = int.parse(await socket.readAsym());
       var sheets = await database.selectCellContent(idCell);
       await socket.writeSym(listToJson(sheets));
@@ -132,9 +123,10 @@ class Server{
     catch (e){ print('Connection lost with host during cellContent'); }
   }
 
-  ///Get the sheet content from [database]
-  Future<void> _sheetContent(SocketCustom socket, Database database) async{
+  ///Get the sheet content from database
+  Future<void> _sheetContent(SocketCustom socket) async{
     try{
+      var database = await socket.setup();
       var idSheet = int.parse(await socket.readAsym());
       var elements = await database.selectSheetContent(idSheet);
       await socket.writeSym(listToJson(elements));
@@ -146,9 +138,10 @@ class Server{
   }
 
   ///Receive a json containing a Cell
-  ///Call [database] to add this Cell
-  Future<void> _addCell(SocketCustom socket, Database database) async{
+  ///Call database to add this Cell
+  Future<void> _addCell(SocketCustom socket) async{
     try{
+      var database = await socket.setup();
       var jsonObj = jsonDecode(await socket.readSym());
       var cell = Cell.fromJson(jsonObj);
       database.addCell(cell.title, cell.subtitle, cell.type);
@@ -171,9 +164,10 @@ class Server{
   }
 
   ///Receive a type and a json
-  ///Call the [database] to add the jsonObject
-  Future<void> _addObject(SocketCustom socket, Database database) async{
+  ///Call the database to add the jsonObject
+  Future<void> _addObject(SocketCustom socket) async{
     try{
+      var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readSym());
@@ -216,9 +210,10 @@ class Server{
   }
 
   ///Receive a type and an index
-  ///Call the [database] to delete the matching object
-  Future<void> _deleteObject(SocketCustom socket, Database database) async{
+  ///Call the database to delete the matching object
+  Future<void> _deleteObject(SocketCustom socket) async{
     try{
+      var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
       var index = int.parse(await socket.readAsym());
@@ -251,9 +246,10 @@ class Server{
   }
 
   ///Receive a type and a json
-  ///Call [database] to update the jsonObject
-  Future<void> _updateObject(SocketCustom socket, Database database) async{
+  ///Call database to update the jsonObject
+  Future<void> _updateObject(SocketCustom socket) async{
     try{
+      var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readSym());
