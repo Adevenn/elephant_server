@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
@@ -22,14 +23,9 @@ class SocketCustom{
 
   ///Receive databaseName, username and password
   Future<Database> _dbValues() async{
-    var databaseName = await readAsym();
+    var dbValues = jsonDecode(await readAsym());
     await synchronizeWrite();
-    var username = await readAsym();
-    await synchronizeWrite();
-    var password = await readAsym();
-    await synchronizeWrite();
-
-    return Database(_ipDatabase, _portDatabase, databaseName, username, password);
+    return Database(_ipDatabase, _portDatabase, dbValues['database'], dbValues['username'], dbValues['password']);
   }
 
   Future<Database> init() async{
