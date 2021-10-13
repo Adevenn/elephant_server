@@ -74,7 +74,7 @@ class Database{
   Future<List<Cell>> selectCells(String matchWord) async{
     try{
       await _initConnection();
-      var results = await _connection.query("SELECT * FROM cell WHERE title LIKE '%$matchWord%';");
+      var results = await _connection.query("SELECT * FROM cell WHERE title LIKE '%$matchWord%' ORDER BY title;");
       await _connection.close();
       return _cellsFromRawValues(results);
     }
