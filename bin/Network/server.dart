@@ -263,7 +263,7 @@ class Server{
           var sheet = Sheet.fromJson(json);
           database.updateSheet(sheet.id, sheet.title, sheet.subtitle, sheet.idOrder);
           break;
-        case 'CheckBox':
+        case 'Checkbox':
           var elem = Element.fromJson(json);
           database.updateCheckBox((elem as CheckBox).id, elem.isChecked, elem.text, elem.idOrder);
           break;
