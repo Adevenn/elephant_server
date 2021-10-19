@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:async/async.dart';
 
 import '../Exception/client_exception.dart';
+import '../Exception/encryption_exception.dart';
 import 'database.dart';
 import 'Encryption/asym_encryption.dart';
 import 'Encryption/sym_encryption.dart';
@@ -39,7 +40,7 @@ class SocketCustom{
       return await _dbValues();
     }
     on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n${e.toString()}'); }
-    on ArgumentError catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
+    on EncryptionException catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)_init: Connection lost with host\n$e'); }
   }
 
@@ -54,7 +55,7 @@ class SocketCustom{
       return await _dbValues();
     }
     on SocketException catch(e){ throw SocketException('(CustomSocket)_setup: Connection lost with ${_socket.address}\n${e.toString()}'); }
-    on ArgumentError catch(e){ throw ClientException('(SocketCustom)setup:\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(SocketCustom)setup:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)_setup: Connection lost with host\n$e'); }
   }
 
@@ -96,21 +97,21 @@ class SocketCustom{
   Future<String> read() async{
     try{ return String.fromCharCodes(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)read\n$e'); }
-    on ArgumentError catch(e){ throw ClientException('(CustomSocket)readSym;\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readSym;\n$e'); }
     catch(e) { throw Exception('(CustomSocket)readAsym;\n$e'); }
   }
 
   Future<String> readAsym() async{
     try{ return _asym.decrypt(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)readAsym\n$e'); }
-    on ArgumentError catch(e){ throw ClientException('(CustomSocket)readSym;\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readAsym;\n$e'); }
     catch(e) { throw Exception('(CustomSocket)readAsym;\n$e'); }
   }
 
   Future<String> readSym() async{
     try{ return _sym.decrypt(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)readSym:\n$e'); }
-    on ArgumentError catch(e){ throw ClientException('(CustomSocket)readSym;\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readSym;\n$e'); }
     catch(e) { throw Exception('(CustomSocket)readSym;\n$e'); }
   }
 

@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart';
 
+import '../../Exception/encryption_exception.dart';
+
 class SymEncryption{
   late final Key _key;
   String get key => _key.base64;
@@ -16,5 +18,10 @@ class SymEncryption{
 
   String encrypt(String plainText) => _encrypt.encrypt(plainText, iv: _iv).base64;
 
-  String decrypt(Uint8List encryptedMsg) => _encrypt.decrypt64(String.fromCharCodes(encryptedMsg), iv: _iv);
+  String decrypt(Uint8List encryptedMsg) {
+   try{
+     return _encrypt.decrypt64(String.fromCharCodes(encryptedMsg), iv: _iv);
+   }
+   catch(e) { throw EncryptionException('(SymEncryption)decrypt:\n$e'); }
+  }
 }

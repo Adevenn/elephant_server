@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 
-import '../Exception/client_exception.dart';
+import '../Exception/encryption_exception.dart';
 import '../Model/cell.dart';
 import '../Model/Elements/checkbox.dart';
 import '../Model/Elements/element.dart';
@@ -37,7 +37,7 @@ class Server{
     var socket = SocketCustom(_socket, _asym, _ipDatabase, _portDatabase);
     try{
       var request = await socket.read();
-      print(request);
+      print('Request: $request');
       switch(request){
         case 'init':
           await _init(socket);
@@ -68,10 +68,7 @@ class Server{
           break;
       }
     }
-    on DatabaseException catch(e){ print('(Server)_handleClient:\n$e'); }
-    on DatabaseTimeoutException catch(e){ print('(Server)_handleClient:\n$e'); }
-    on SocketException catch(e){ throw SocketException('(Server)_handleClient:\n$e'); }
-    catch(e) { throw Exception('(Server)_handleClient:\n$e'); }
+    catch (e) { print('(Server)_handleClient:\n$e'); }
     await socket.disconnect();
     print('Client disconnected');
   }
@@ -105,7 +102,7 @@ class Server{
       await socket.writeSym(listToJson(cells));
     }
     on SocketException{ print('(Server)_cells: Client disconnected'); }
-    on ClientException{ print('(Server)_cells:\nClient Exception'); }
+    on EncryptionException{ print('(Server)_cells:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_cells:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_cells:\n$e'); }
     catch(e) { throw Exception('(Server)_cells:\n$e'); }
@@ -120,7 +117,7 @@ class Server{
       await socket.writeSym(listToJson(sheets));
     }
     on SocketException{ print('(Server)_cellContent:\nSocketException'); }
-    on ClientException{ print('(Server)_cellContent:\nClient Exception'); }
+    on EncryptionException{ print('(Server)_cellContent:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_cellContent:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_cellContent:\n$e'); }
     catch (e){ print('Connection lost with host during cellContent'); }
@@ -135,7 +132,7 @@ class Server{
       await socket.writeSym(listToJson(elements));
     }
     on SocketException{ print('(Server)_sheetContent:\nSocketException'); }
-    on ClientException{ print('(Server)_sheetContent:\nClient Exception'); }
+    on EncryptionException{ print('(Server)_sheetContent:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_sheetContent:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_sheetContent:\n$e'); }
     catch (e){ print(e); }
@@ -152,9 +149,9 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
-    on ClientException{
+    on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_addCll\nClient Exception');
+      print('(Server)_addCell\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
@@ -202,9 +199,9 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
-    on ClientException{
+    on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\nClient Exception');
+      print('(Server)_addObject:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
@@ -251,9 +248,9 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
-    on ClientException{
+    on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_deleteObject:\nClient Exception');
+      print('(Server)_deleteObject:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
@@ -306,9 +303,9 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
-    on ClientException{
+    on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\nClient Exception');
+      print('(Server)_updateObject:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
