@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 
+import '../Exception/client_exception.dart';
 import '../Model/cell.dart';
 import '../Model/Elements/checkbox.dart';
 import '../Model/Elements/element.dart';
@@ -104,8 +105,9 @@ class Server{
       await socket.writeSym(listToJson(cells));
     }
     on SocketException{ print('(Server)_cells: Client disconnected'); }
-    on DatabaseException catch(e) { print('(Server)_cells:\n${e.toString()}'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_cells:\n${e.toString()}'); }
+    on ClientException{ print('(Server)_cells:\nClient Exception'); }
+    on DatabaseException catch(e) { print('(Server)_cells:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_cells:\n$e'); }
     catch(e) { throw Exception('(Server)_cells:\n$e'); }
   }
 
@@ -114,12 +116,13 @@ class Server{
     try{
       var database = await socket.setup();
       var idCell = int.parse(await socket.readAsym());
-      var sheets = await database.selectCellContent(idCell);
+      var sheets = await database.selectSheets(idCell);
       await socket.writeSym(listToJson(sheets));
     }
-    on SocketException{ print('SocketException'); }
-    on DatabaseException catch(e) { print('(Server)_testConnection:\n${e.toString()}'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_testConnection:\n${e.toString()}'); }
+    on SocketException{ print('(Server)_cellContent:\nSocketException'); }
+    on ClientException{ print('(Server)_cellContent:\nClient Exception'); }
+    on DatabaseException catch(e) { print('(Server)_cellContent:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_cellContent:\n$e'); }
     catch (e){ print('Connection lost with host during cellContent'); }
   }
 
@@ -128,12 +131,13 @@ class Server{
     try{
       var database = await socket.setup();
       var idSheet = int.parse(await socket.readAsym());
-      var elements = await database.selectSheetContent(idSheet);
+      var elements = await database.selectElements(idSheet);
       await socket.writeSym(listToJson(elements));
     }
-    on SocketException{ print('SocketException'); }
-    on DatabaseException catch(e) { print('(Server)_testConnection:\n${e.toString()}'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_testConnection:\n${e.toString()}'); }
+    on SocketException{ print('(Server)_sheetContent:\nSocketException'); }
+    on ClientException{ print('(Server)_sheetContent:\nClient Exception'); }
+    on DatabaseException catch(e) { print('(Server)_sheetContent:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_sheetContent:\n$e'); }
     catch (e){ print(e); }
   }
 
@@ -148,15 +152,19 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
+    on ClientException{
+      await socket.writeAsym('failed');
+      print('(Server)_addCll\nClient Exception');
+    }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addCell:\n${e.toString()}');
+      print('(Server)_addCell:\n$e');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addCell:\n${e.toString()}');
+      print('(Server)_addCell:\n$e');
     }
-    on SocketException{ print('(Server)_addCell: Connection lost with '); }
+    on SocketException catch(e){ print('(Server)_addCell: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
       print('(Server)_addCell:\n$e');
@@ -194,15 +202,19 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
+    on ClientException{
+      await socket.writeAsym('failed');
+      print('(Server)_addObject:\nClient Exception');
+    }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\n${e.toString()}');
+      print('(Server)_addObject:\n$e');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\n${e.toString()}');
+      print('(Server)_addObject:\n$e');
     }
-    on SocketException{ print('(Server)_addObject: Connection lost with '); }
+    on SocketException catch(e){ print('(Server)_addObject: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
       print('(Server)_addObject:\n$e');
@@ -239,6 +251,19 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
+    on ClientException{
+      await socket.writeAsym('failed');
+      print('(Server)_deleteObject:\nClient Exception');
+    }
+    on DatabaseException catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_deleteObject:\n$e');
+    }
+    on DatabaseTimeoutException catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_deleteObject:\n$e');
+    }
+    on SocketException catch(e){ print('(Server)_deleteObject: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
       print('(Server)_deleteObject:\n$e');
@@ -280,7 +305,21 @@ class Server{
       }
       await socket.writeAsym('success');
       print('success');
-    } catch(e){
+    }
+    on ClientException{
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\nClient Exception');
+    }
+    on DatabaseException catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\n$e');
+    }
+    on DatabaseTimeoutException catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\n$e');
+    }
+    on SocketException catch(e){ print('(Server)_updateObject: Connection lost with ${e.address}'); }
+    catch(e){
       await socket.writeAsym('failed');
       print('(Server)_updateObject:\n$e');
     }

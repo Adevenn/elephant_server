@@ -27,12 +27,18 @@ class Database{
     _password = password;
   }
 
+  List<Element> sortByIdOrder(){
+    var elements = <Element>[];
+
+    return elements;
+  }
+
   Future<void> _initConnection() async{
     _connection = PostgreSQLConnection(_ip, _port, _database, username: _username, password: _password, timeoutInSeconds: 3);
     try{ await _connection.open(); }
     on PostgreSQLException { throw DatabaseException('(Database)_initConnection: Wrong DATABASE ($_database), USERNAME ($_username) or PASSWORD ($_password)'); }
     on TimeoutException { throw DatabaseTimeoutException('(Database)_initConnection: Database disconnected'); }
-    catch(e) { throw Exception('(Database)_initConnection: Connection failed\n${e.toString()}'); }
+    catch(e) { throw Exception('(Database)_initConnection: Connection failed\n$e'); }
   }
 
   Future<void> testConnection() async{
@@ -68,7 +74,7 @@ class Database{
       }
       return cells;
     }
-    catch (e){ throw DatabaseException('(Database)_cellsFromRawValues:\n${e.toString()}'); }
+    catch (e){ throw DatabaseException('(Database)_cellsFromRawValues:\n$e}'); }
   }
 
   Future<List<Cell>> selectCells(String matchWord) async{
@@ -79,10 +85,10 @@ class Database{
       return _cellsFromRawValues(results);
     }
     on TimeoutException { throw DatabaseTimeoutException('(Database)_initConnection: Database disconnected'); }
-    catch(e){ throw DatabaseException('(Database)${e.toString()}'); }
+    catch(e){ throw DatabaseException('(Database)$e'); }
   }
 
-  Future<List<Sheet>> selectCellContent(int idCell) async{
+  Future<List<Sheet>> selectSheets(int idCell) async{
     try{
       PostgreSQLResult sheetsRaw;
       var sheets = <Sheet>[];
@@ -97,17 +103,17 @@ class Database{
     }
     on PostgreSQLException{ throw DatabaseException(''); }
     on TimeoutException { throw DatabaseTimeoutException('(Database)_initConnection: Database disconnected'); }
-    catch(e) { throw DatabaseException('(Database)${e.toString()}'); }
+    catch(e) { throw DatabaseException('(Database)$e'); }
   }
 
-  Future<List<Element>> selectSheetContent(int idSheet) async{
+  Future<List<Element>> selectElements(int idSheet) async{
     try{
       var elems = <Element>[];
       PostgreSQLResult checkboxes, images, texts;
       await _initConnection();
-      checkboxes = await _connection.query('SELECT id, text, ischeck, idorder FROM checkbox WHERE idparent = $idSheet;');
-      images = await _connection.query('SELECT id, data, idorder FROM image WHERE idparent = $idSheet;');
-      texts = await _connection.query('SELECT id, text, type, idorder FROM texts WHERE idparent = $idSheet;');
+      checkboxes = await _connection.query('SELECT id, text, ischeck, idorder FROM checkbox WHERE idparent = $idSheet ORDER BY idorder;');
+      images = await _connection.query('SELECT id, data, idorder FROM image WHERE idparent = $idSheet ORDER BY idorder;');
+      texts = await _connection.query('SELECT id, text, type, idorder FROM texts WHERE idparent = $idSheet ORDER BY idorder;');
       await _connection.close();
 
       //Extract data from db values and create objects
@@ -161,7 +167,7 @@ class Database{
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
-    catch(e) { throw DatabaseException('(Database)addSheet: Connection lost'); }
+    catch(e) { throw DatabaseException('(Database)addSheet: Connection lost\n$e'); }
   }
 
   void addCheckBox(String text, bool isCheck, int idSheet, int idOrder) async{
@@ -169,7 +175,7 @@ class Database{
       await _initConnection();
       await _connection.query("INSERT INTO checkbox (text, ischeck, idparent, idorder) VALUES ('$text', $isCheck, $idSheet, $idOrder);");
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost\n$e'); }
   }
 
   void addImage(Uint8List data, int idSheet, int idOrder) async{
@@ -177,7 +183,7 @@ class Database{
       await _initConnection();
       await _connection.query('INSERT INTO image (data, parent, idorder) VALUES ($data, $idSheet, $idOrder);');
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)addImage: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)addImage: Connection lost\n$e'); }
   }
 
   void addTexts(String text, int type, int idSheet, int idOrder) async{
@@ -185,7 +191,7 @@ class Database{
       await _initConnection();
       await _connection.query("INSERT INTO texts (text, type, idparent, idorder) VALUES ('$text', $type, $idSheet, $idOrder);");
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)addTexts: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)addTexts: Connection lost\n$e'); }
   }
 
   /// DELETE ///
@@ -195,7 +201,7 @@ class Database{
       await _initConnection();
       await _connection.query('DELETE FROM cell WHERE id = $idCell;');
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)deleteCell: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)deleteCell: Connection lost\n$e'); }
   }
 
   void deleteSheet(int idSheet) async{
@@ -209,7 +215,7 @@ class Database{
        await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
       }
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost\n$e'); }
   }
 
   void deleteCheckBox(int idCheckbox) async{
@@ -217,7 +223,7 @@ class Database{
       await _initConnection();
       await _connection.query('DELETE FROM checkbox WHERE id = $idCheckbox;');
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)deleteCheckbox: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)deleteCheckbox: Connection lost\n$e'); }
   }
 
   void deleteImage(int idImage) async{
@@ -225,7 +231,7 @@ class Database{
       await _initConnection();
       await _connection.query('DELETE FROM image WHERE id = $idImage;');
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)deleteImage: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)deleteImage: Connection lost\n$e'); }
   }
 
   void deleteTexts(int idTexts) async{
@@ -233,24 +239,17 @@ class Database{
       await _initConnection();
       await _connection.query('DELETE FROM texts WHERE id = $idTexts;');
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)deleteTexts: Connection lost'); }
+    } catch(e) { throw DatabaseException('(Database)deleteTexts: Connection lost\n$e'); }
   }
 
   /// UPDATE ///
-
-  void save(Cell cell) async{
-    try{
-
-    }
-    catch(e) { print('Connection failed'); }
-  }
 
   void updateCell(int id, String title, String subtitle) async{
     try{
       await _initConnection();
       await _connection.query("UPDATE cell SET title = '$title', subtitle = '$subtitle' WHERE id = $id;");
       await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateCell: Connection lost'); }
+    } catch(e){ throw DatabaseException('(Database)updateCell: Connection lost\n$e'); }
   }
 
   void updateSheet(int id, String title, String subtitle, int idOrder) async{
@@ -258,7 +257,7 @@ class Database{
       await _initConnection();
       await _connection.query("UPDATE sheet SET title = '$title', subtitle = '$subtitle', idorder = $idOrder WHERE id = $id;");
       await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateSheet: Connection lost'); }
+    } catch(e){ throw DatabaseException('(Database)updateSheet: Connection lost\n$e'); }
   }
 
   void updateCheckBox(int id, bool isCheck, String text, int idOrder) async{
@@ -266,7 +265,7 @@ class Database{
       await _initConnection();
       await _connection.query("UPDATE checkbox SET ischeck = $isCheck, text = '$text', idorder = $idOrder WHERE id = $id;");
       await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost'); }
+    } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
 
   void updateImage(int id, Uint8List data, int idOrder) async{
@@ -274,7 +273,7 @@ class Database{
       await _initConnection();
       await _connection.query('UPDATE image SET data = $data, idorder = $idOrder WHERE id = $id;');
       await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateImage: Connection lost'); }
+    } catch(e){ throw DatabaseException('(Database)updateImage: Connection lost\n$e'); }
   }
 
   void updateTexts(int id, String text, int type, int idOrder) async{
@@ -282,7 +281,7 @@ class Database{
       await _initConnection();
       await _connection.query("UPDATE texts SET text = '$text', type = $type, idorder = $idOrder WHERE id = $id;");
       await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateTexts: Connection lost'); }
+    } catch(e){ throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
 }
 

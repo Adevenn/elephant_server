@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 
+import '../Exception/client_exception.dart';
 import 'database.dart';
 import 'Encryption/asym_encryption.dart';
 import 'Encryption/sym_encryption.dart';
@@ -23,9 +24,13 @@ class SocketCustom{
 
   ///Receive databaseName, username and password
   Future<Database> _dbValues() async{
-    var dbValues = jsonDecode(await readAsym());
-    await synchronizeWrite();
-    return Database(_ipDatabase, _portDatabase, dbValues['database'], dbValues['username'], dbValues['password']);
+    try{
+      var dbValues = jsonDecode(await readAsym());
+      await synchronizeWrite();
+      return Database(_ipDatabase, _portDatabase, dbValues['database'], dbValues['username'], dbValues['password']);
+    }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n${e.toString()}'); }
+    catch(e){ throw Exception(e); }
   }
 
   Future<Database> init() async{
@@ -34,6 +39,7 @@ class SocketCustom{
       return await _dbValues();
     }
     on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n${e.toString()}'); }
+    on ArgumentError catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)_init: Connection lost with host\n$e'); }
   }
 
@@ -48,6 +54,7 @@ class SocketCustom{
       return await _dbValues();
     }
     on SocketException catch(e){ throw SocketException('(CustomSocket)_setup: Connection lost with ${_socket.address}\n${e.toString()}'); }
+    on ArgumentError catch(e){ throw ClientException('(SocketCustom)setup:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)_setup: Connection lost with host\n$e'); }
   }
 
@@ -58,7 +65,7 @@ class SocketCustom{
       await _socket.close();
       _socket.destroy();
     }
-    on SocketException { throw SocketException; }
+    on SocketException catch(e){ throw SocketException('(SocketCustom)disconnect:\n$e'); }
     catch(e) { throw Exception(e); }
   }
 
@@ -70,43 +77,46 @@ class SocketCustom{
 
   Future<void> writeAsym(String plainText) async{
     try{ _socket.write(_asym.encrypt(plainText)); }
-    on SocketException { throw SocketException('(CustomSocket)writeAsym'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)writeAsym:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)writeAsym:\n$e'); }
   }
 
   Future<void> writeSym(String plainText) async{
     try{ _socket.write(_sym.encrypt(plainText)); }
-    on SocketException { throw SocketException('(CustomSocket)writeSym'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)writeSym:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)writeSym:\n$e'); }
   }
 
   Future<void> synchronizeWrite() async{
     try{ _socket.write('ok'); }
-    on SocketException { throw SocketException('(CustomSocket)synchronizeWrite'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)synchronizeWrite:\n$e'); }
     catch (e){ throw Exception('(CustomSocket)synchronizeWrite:\n$e'); }
   }
 
   Future<String> read() async{
     try{ return String.fromCharCodes(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)read\n$e'); }
+    on ArgumentError catch(e){ throw ClientException('(CustomSocket)readSym;\n$e'); }
     catch(e) { throw Exception('(CustomSocket)readAsym;\n$e'); }
   }
 
   Future<String> readAsym() async{
     try{ return _asym.decrypt(await _queue.next); }
-    on SocketException { throw SocketException('(CustomSocket)readAsym'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)readAsym\n$e'); }
+    on ArgumentError catch(e){ throw ClientException('(CustomSocket)readSym;\n$e'); }
     catch(e) { throw Exception('(CustomSocket)readAsym;\n$e'); }
   }
 
   Future<String> readSym() async{
     try{ return _sym.decrypt(await _queue.next); }
-    on SocketException { throw SocketException('(CustomSocket)readSym'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)readSym:\n$e'); }
+    on ArgumentError catch(e){ throw ClientException('(CustomSocket)readSym;\n$e'); }
     catch(e) { throw Exception('(CustomSocket)readSym;\n$e'); }
   }
 
   Future<void> synchronizeRead() async{
     try{ await _queue.next; }
-    on SocketException { throw SocketException('(CustomSocket)synchronizeRead'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)synchronizeRead:\n$e'); }
     catch (e){ throw Exception('(CustomSocket)synchronizeRead:\n$e'); }
   }
 }
