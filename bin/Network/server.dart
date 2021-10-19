@@ -68,7 +68,7 @@ class Server{
           break;
       }
     }
-    catch (e) { print('(Server)_handleClient:\n$e'); }
+    catch(e) { print('(Server)_handleClient:\n$e'); }
     await socket.disconnect();
     print('Client disconnected');
   }

@@ -27,9 +27,22 @@ class Database{
     _password = password;
   }
 
-  List<Element> sortByIdOrder(){
-    var elements = <Element>[];
-
+  List<Element> sortByIdOrder(List<Element> elements){
+    var isSort = true;
+    while(true){
+      for(var i = 0; i < elements.length; i++){
+        if(elements[i].idOrder > elements[i-1].idOrder){
+          var elem = elements[i];
+          elements[i] = elements[i-1];
+          elements[i-1] = elem;
+          isSort = false;
+        }
+      }
+      if(isSort){
+        break;
+      }
+      isSort = true;
+    }
     return elements;
   }
 
@@ -125,6 +138,10 @@ class Database{
       }
       for(final elem in texts) {
         elems.add(Texts(id: elem[0] as int, idParent: idSheet,text: elem[1] as String, txtType: TextType.values[elem[2] as int], idOrder: elem[3] as int));
+      }
+
+      if(elems.length > 1){
+        elems = sortByIdOrder(elems);
       }
 
       return elems;
