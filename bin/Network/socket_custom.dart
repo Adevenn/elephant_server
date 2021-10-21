@@ -64,10 +64,12 @@ class SocketCustom{
     try {
       await _socket.flush();
       await _socket.close();
+    }
+    on SocketException catch(e){ print('(SocketCustom)disconnect:\n$e'); }
+    catch(e) { throw Exception(e); }
+    finally{
       _socket.destroy();
     }
-    on SocketException catch(e){ throw SocketException('(SocketCustom)disconnect:\n$e'); }
-    catch(e) { throw Exception(e); }
   }
 
   Future<void> write(String plainText) async{

@@ -128,7 +128,6 @@ class Server{
     try{
       var database = await socket.setup();
       var idSheet = int.parse(await socket.readAsym());
-      print(idSheet);
       var elements = await database.selectElements(idSheet);
       await socket.writeSym(listToJson(elements));
     }
