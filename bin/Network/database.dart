@@ -180,7 +180,6 @@ class Database{
     try{
       await _initConnection();
       await _connection.query("SELECT addsheet(CAST($idCell as bigint), CAST(\'$title\' as text), CAST(\'$subtitle\' as text));");
-      print('add sheet done in db');
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
