@@ -120,7 +120,7 @@ class Server{
     on EncryptionException{ print('(Server)_cellContent:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_cellContent:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_cellContent:\n$e'); }
-    catch (e){ print('Connection lost with host during cellContent'); }
+    catch (e){ print('Connection lost with host during cellContent\n$e'); }
   }
 
   ///Get the sheet content from database
@@ -128,6 +128,7 @@ class Server{
     try{
       var database = await socket.setup();
       var idSheet = int.parse(await socket.readAsym());
+      print(idSheet);
       var elements = await database.selectElements(idSheet);
       await socket.writeSym(listToJson(elements));
     }
@@ -135,7 +136,7 @@ class Server{
     on EncryptionException{ print('(Server)_sheetContent:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_sheetContent:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_sheetContent:\n$e'); }
-    catch (e){ print(e); }
+    catch (e){ print('(Server)_sheetContent:\n$e'); }
   }
 
   ///Receive a json containing a Cell
@@ -327,9 +328,7 @@ class Server{
   ///and each item in the list must be jsonDecode to recreate the object
   String listToJson(var list){
     var json = <String>[];
-    //print('List :');
     for(var i = 0; i < list.length; i++){
-      //print(list[i].toJson());
       json.add(jsonEncode(list[i]));
     }
     return jsonEncode(json);

@@ -30,7 +30,7 @@ class Database{
   List<Element> sortByIdOrder(List<Element> elements){
     var isSort = true;
     while(true){
-      for(var i = 0; i < elements.length; i++){
+      for(var i = 1; i < elements.length; i++){
         if(elements[i].idOrder > elements[i-1].idOrder){
           var elem = elements[i];
           elements[i] = elements[i-1];
@@ -141,9 +141,9 @@ class Database{
       }
 
       if(elems.length > 1){
-        elems = sortByIdOrder(elems);
+        //elems = sortByIdOrder(elems);
       }
-
+      print(elems);
       return elems;
     }
     on PostgreSQLException { throw DatabaseException('(Database)'); }
@@ -180,7 +180,8 @@ class Database{
   void addSheet(int idCell, String title, String subtitle, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, '$title', '$subtitle', $idOrder);");
+      await _connection.query("SELECT addsheet(CAST($idCell as bigint), CAST(\'$title\' as text), CAST(\'$subtitle\' as text));");
+      print('add sheet done in db');
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
@@ -212,6 +213,22 @@ class Database{
   }
 
   /// DELETE ///
+
+  Future<String> updateIdOrders(int idSheet) async{
+    var elements = await selectElements(idSheet);
+    var queryPart = '';
+    for(var i = 0; i < elements.length; i++){
+      if(elements[i].idOrder != i){
+        for(var j = i; j < elements.length; j++){
+          elements[j].idOrder = j;
+          //TODO: finish the query
+          queryPart += 'update ${elements[j].runtimeType.toString().toLowerCase()} set idorder = $j';
+        }
+        break;
+      }
+    }
+    return queryPart;
+  }
 
   void deleteCell(int idCell) async{
     try{
