@@ -13,7 +13,6 @@ import 'Encryption/asym_encryption.dart';
 import 'socket_custom.dart';
 import 'database.dart';
 
-
 class Server{
   final String _ipServer;
   final int _portServer;
@@ -29,7 +28,7 @@ class Server{
     try{
       print('/* Waiting for connections */');
       server.listen(_handleClient);
-    } catch(e) { await server.close(); }
+    } catch(e){ await server.close(); }
   }
 
   void _handleClient(Socket _socket) async{
@@ -57,7 +56,7 @@ class Server{
         case 'addItem':
           await _addItem(socket);
           break;
-        case 'deleteObjectItem':
+        case 'deleteItem':
           await _deleteItem(socket);
           break;
         case 'updateItem':
@@ -68,7 +67,7 @@ class Server{
           break;
       }
     }
-    catch(e) { print('(Server)_handleClient:\n$e'); }
+    catch(e){ print('(Server)_handleClient:\n$e'); }
     await socket.disconnect();
     print('Client disconnected');
   }
@@ -105,7 +104,7 @@ class Server{
     on EncryptionException{ print('(Server)_cells:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_cells:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_cells:\n$e'); }
-    catch(e) { throw Exception('(Server)_cells:\n$e'); }
+    catch(e){ throw Exception('(Server)_cells:\n$e'); }
   }
 
   ///Get the cell content from database
@@ -120,7 +119,7 @@ class Server{
     on EncryptionException{ print('(Server)_cellContent:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_cellContent:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_cellContent:\n$e'); }
-    catch (e){ print('Connection lost with host during cellContent\n$e'); }
+    catch(e){ print('Connection lost with host during cellContent\n$e'); }
   }
 
   ///Get the sheet content from database
@@ -135,7 +134,7 @@ class Server{
     on EncryptionException{ print('(Server)_sheetContent:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_sheetContent:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_sheetContent:\n$e'); }
-    catch (e){ print('(Server)_sheetContent:\n$e'); }
+    catch(e){ print('(Server)_sheetContent:\n$e'); }
   }
 
   ///Receive a json containing a Cell
@@ -225,22 +224,23 @@ class Server{
       var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
-      var index = int.parse(await socket.readAsym());
+      var idItem = int.parse(await socket.readAsym());
+      print('idItem: $idItem');
       switch(type){
         case 'Cell':
-          database.deleteCell(index);
+          database.deleteCell(idItem);
           break;
         case 'Sheet':
-          database.deleteSheet(index);
+          database.deleteSheet(idItem);
           break;
         case 'CheckBox':
-          database.deleteCheckBox(index);
+          database.deleteCheckBox(idItem);
           break;
         case 'Images':
-          database.deleteImage(index);
+          database.deleteImage(idItem);
           break;
         case 'Texts':
-          database.deleteTexts(index);
+          database.deleteTexts(idItem);
           break;
         default:
           throw Exception('Wrong object type');

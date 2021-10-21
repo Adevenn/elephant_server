@@ -30,7 +30,7 @@ class SocketCustom{
       await synchronizeWrite();
       return Database(_ipDatabase, _portDatabase, dbValues['database'], dbValues['username'], dbValues['password']);
     }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n${e.toString()}'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n$e'); }
     catch(e){ throw Exception(e); }
   }
 
@@ -39,7 +39,7 @@ class SocketCustom{
       _socket.write(_asym.publicKey);
       return await _dbValues();
     }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n${e.toString()}'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n$e'); }
     on EncryptionException catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)_init: Connection lost with host\n$e'); }
   }
@@ -54,7 +54,7 @@ class SocketCustom{
       await synchronizeWrite();
       return await _dbValues();
     }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)_setup: Connection lost with ${_socket.address}\n${e.toString()}'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)_setup: Connection lost with ${_socket.address}\n$e'); }
     on EncryptionException catch(e){ throw EncryptionException('(SocketCustom)setup:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)_setup: Connection lost with host\n$e'); }
   }

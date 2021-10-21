@@ -59,8 +59,8 @@ class Database{
       await _initConnection();
       await _connection.close();
     }
-    on DatabaseException catch(e){ throw DatabaseException(e.toString()); }
-    on DatabaseTimeoutException catch(e) { throw DatabaseTimeoutException(e.toString()); }
+    on DatabaseException catch(e){ throw DatabaseException('$e'); }
+    on DatabaseTimeoutException catch(e) { throw DatabaseTimeoutException('$e'); }
     on TimeoutException { throw DatabaseTimeoutException('(Database)_initConnection: Database disconnected or make too much time to answer'); }
     catch(e) { throw Exception(e); }
   }
@@ -212,22 +212,6 @@ class Database{
 
   /// DELETE ///
 
-  Future<String> updateIdOrders(int idSheet) async{
-    var elements = await selectElements(idSheet);
-    var queryPart = '';
-    for(var i = 0; i < elements.length; i++){
-      if(elements[i].idOrder != i){
-        for(var j = i; j < elements.length; j++){
-          elements[j].idOrder = j;
-          //TODO: finish the query
-          queryPart += 'update ${elements[j].runtimeType.toString().toLowerCase()} set idorder = $j';
-        }
-        break;
-      }
-    }
-    return queryPart;
-  }
-
   void deleteCell(int idCell) async{
     try{
       await _initConnection();
@@ -239,12 +223,18 @@ class Database{
   void deleteSheet(int idSheet) async{
     try{
       await _initConnection();
-      var idCellRaw = await _connection.query("SELECT idcell FROM sheet WHERE id = '$idSheet';");
-      var idCell = idCellRaw[0][0] as int;
-      await _connection.query('DELETE FROM sheet WHERE id = $idSheet;');
-      var sheets = await _connection.query('SELECT * FROM sheet WHERE idcell = $idCell;');
-      if(sheets.isEmpty){
-       await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
+      var sheets = <Sheet>[];
+      var sheetsRaw = await _connection.query('SELECT * from deletesheet(CAST($idSheet as bigint));');
+      for(var row in sheetsRaw){
+        sheets.add(Sheet(row[0] as int, row[1] as int, row[2] as String, row[3] as String, row[4] as int));
+      }
+      //Sort sheets
+      if(sheets.length > 1){
+        for(var i = 0; i < sheets.length; i++){
+          if(sheets[i].idOrder != i){
+            await _connection.query('UPDATE sheet SET idorder = $i WHERE sheet.id = ${sheets[i].id};\n');
+          }
+        }
       }
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost\n$e'); }
