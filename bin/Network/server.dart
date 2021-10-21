@@ -54,14 +54,14 @@ class Server{
         case 'addCell':
           await _addCell(socket);
           break;
-        case 'addObject':
-          await _addObject(socket);
+        case 'addItem':
+          await _addItem(socket);
           break;
-        case 'deleteObject':
-          await _deleteObject(socket);
+        case 'deleteObjectItem':
+          await _deleteItem(socket);
           break;
-        case 'updateObject':
-          await _updateObject(socket);
+        case 'updateItem':
+          await _updateItem(socket);
           break;
         default:
           print('No server request match with client request');
@@ -170,7 +170,7 @@ class Server{
 
   ///Receive a type and a json
   ///Call the database to add the jsonObject
-  Future<void> _addObject(SocketCustom socket) async{
+  Future<void> _addItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
       var type = await socket.readAsym();
@@ -220,7 +220,7 @@ class Server{
 
   ///Receive a type and an index
   ///Call the database to delete the matching object
-  Future<void> _deleteObject(SocketCustom socket) async{
+  Future<void> _deleteItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
       var type = await socket.readAsym();
@@ -269,7 +269,7 @@ class Server{
 
   ///Receive a type and a json
   ///Call database to update the jsonObject
-  Future<void> _updateObject(SocketCustom socket) async{
+  Future<void> _updateItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
       var type = await socket.readAsym();
