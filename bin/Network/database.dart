@@ -141,9 +141,8 @@ class Database{
       }
 
       if(elems.length > 1){
-        //elems = sortByIdOrder(elems);
+        elems = sortByIdOrder(elems);
       }
-      print(elems);
       return elems;
     }
     on PostgreSQLException { throw DatabaseException('(Database)'); }
