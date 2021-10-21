@@ -45,11 +45,11 @@ class Server{
         case 'cells':
           await _cells(socket);
           break;
-        case 'cellContent':
-          await _cellContent(socket);
+        case 'sheets':
+          await _sheets(socket);
           break;
-        case 'sheetContent':
-          await _sheetContent(socket);
+        case 'elements':
+          await _elements(socket);
           break;
         case 'addCell':
           await _addCell(socket);
@@ -109,7 +109,7 @@ class Server{
   }
 
   ///Get the cell content from database
-  Future<void> _cellContent(SocketCustom socket) async {
+  Future<void> _sheets(SocketCustom socket) async {
     try{
       var database = await socket.setup();
       var idCell = int.parse(await socket.readAsym());
@@ -124,7 +124,7 @@ class Server{
   }
 
   ///Get the sheet content from database
-  Future<void> _sheetContent(SocketCustom socket) async{
+  Future<void> _elements(SocketCustom socket) async{
     try{
       var database = await socket.setup();
       var idSheet = int.parse(await socket.readAsym());
