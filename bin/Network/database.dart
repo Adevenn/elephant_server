@@ -232,7 +232,7 @@ class Database{
       if(sheets.length > 1){
         for(var i = 0; i < sheets.length; i++){
           if(sheets[i].idOrder != i){
-            await _connection.query('UPDATE sheet SET idorder = $i WHERE sheet.id = ${sheets[i].id};\n');
+            await _connection.query('UPDATE sheet SET idorder = $i WHERE sheet.id = ${sheets[i].id};');
           }
         }
       }
@@ -298,12 +298,12 @@ class Database{
     } catch(e){ throw DatabaseException('(Database)updateImage: Connection lost\n$e'); }
   }
 
-  void updateTexts(int id, String text, int type, int idOrder) async{
-    try{
+  void updateTexts(int id, String text, int type, int idOrder) async {
+    try {
       await _initConnection();
       await _connection.query("UPDATE texts SET text = '$text', type = $type, idorder = $idOrder WHERE id = $id;");
       await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
+    } catch (e) { throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
 }
 
