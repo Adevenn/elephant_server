@@ -305,6 +305,27 @@ class Database{
       await _connection.close();
     } catch (e) { throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
+
+  void updateSheetOrder(List<Sheet> sheets) async{
+    try{
+      await _initConnection();
+      for(var i = 0; i < sheets.length; i++){
+        await _connection.query('UPDATE sheet SET idorder = ${sheets[i].idOrder} WHERE id = ${sheets[i].id}');
+      }
+      await _connection.close();
+    } catch(e) { throw DatabaseException('(Database)updateSheetOrder:\n$e'); }
+  }
+
+  void updateElementOrder(List<Element> elements) async{
+    try{
+      await _initConnection();
+      for(var i = 0; i < elements.length; i++){
+        //TODO query
+        await _connection.query('');
+      }
+      await _connection.close();
+    } catch(e) { throw DatabaseException('(Database)updateElementOrder:\n$e'); }
+  }
 }
 
 class DatabaseException implements Exception{

@@ -62,6 +62,9 @@ class Server{
         case 'updateItem':
           await _updateItem(socket);
           break;
+        case 'updateOrder':
+          await _updateOrder(socket);
+          break;
         default:
           print('No server request match with client request');
           break;
@@ -322,6 +325,47 @@ class Server{
     }
   }
 
+  Future<void> _updateOrder(SocketCustom socket) async {
+    try{
+      var database = await socket.setup();
+      var type = await socket.readAsym();
+      await socket.synchronizeWrite();
+      var jsonList = jsonDecode(await socket.readSym());
+
+      switch(type){
+        case 'sheet':
+          var sheets = jsonToSheets(jsonList);
+          database.updateSheetOrder(sheets);
+          break;
+        case 'element':
+          var elements = jsonToElements(jsonList);
+          database.updateElementOrder(elements);
+          break;
+        default:
+          throw Exception('Wrong object type');
+      }
+      await socket.writeAsym('success');
+      print('success');
+    }
+    on EncryptionException{
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\nEncryption Exception');
+    }
+    on DatabaseException catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\n$e');
+    }
+    on DatabaseTimeoutException catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\n$e');
+    }
+    on SocketException catch(e){ print('(Server)_updateObject: Connection lost with ${e.address}'); }
+    catch(e){
+      await socket.writeAsym('failed');
+      print('(Server)_updateObject:\n$e');
+    }
+  }
+
   ///Convert a [list] of objects to a json
   ///To extract the json must be jsonDecode to get a list of json
   ///and each item in the list must be jsonDecode to recreate the object
@@ -331,5 +375,23 @@ class Server{
       json.add(jsonEncode(list[i]));
     }
     return jsonEncode(json);
+  }
+
+  ///Convert a [jsonList] into a list of [Sheet]
+  List<Sheet> jsonToSheets(List<Map<String, dynamic>> jsonList){
+    var sheets = <Sheet>[];
+    for(var i = 0; i < jsonList.length; i++){
+      sheets.add(Sheet.fromJson(jsonList[i]));
+    }
+    return sheets;
+  }
+
+  ///Convert a [jsonList] into a list of [Element]
+  List<Element> jsonToElements(List<Map<String, dynamic>> jsonList){
+    var elements = <Element>[];
+    for(var i = 0; i < jsonList.length; i++){
+      elements.add(Element.fromJson(jsonList[i]));
+    }
+    return elements;
   }
 }
