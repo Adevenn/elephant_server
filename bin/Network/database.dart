@@ -306,7 +306,7 @@ class Database{
     } catch (e) { throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
 
-  void updateSheetOrder(List<Sheet> sheets) async{
+  Future<void> updateSheetOrder(List<Sheet> sheets) async{
     try{
       await _initConnection();
       for(var i = 0; i < sheets.length; i++){
@@ -316,7 +316,7 @@ class Database{
     } catch(e) { throw DatabaseException('(Database)updateSheetOrder:\n$e'); }
   }
 
-  void updateElementOrder(List<Element> elements) async{
+  Future<void> updateElementOrder(List<Element> elements) async{
     try{
       await _initConnection();
       for(var i = 0; i < elements.length; i++){

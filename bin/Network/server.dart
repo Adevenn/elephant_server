@@ -334,11 +334,11 @@ class Server{
       switch(type){
         case 'sheet':
           var sheets = jsonToSheets(jsonList);
-          database.updateSheetOrder(sheets);
+          await database.updateSheetOrder(sheets);
           break;
         case 'element':
           var elements = jsonToElements(jsonList);
-          database.updateElementOrder(elements);
+          await database.updateElementOrder(elements);
           break;
         default:
           throw Exception('Wrong object type');
