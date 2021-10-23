@@ -181,19 +181,19 @@ class Server{
       switch(type){
         case 'Sheet':
           var sheet = Sheet.fromJson(jsonDecode(json));
-          database.addSheet(sheet.idParent, sheet.title, sheet.subtitle, sheet.idOrder);
+          await database.addSheet(sheet.idParent, sheet.title, sheet.subtitle, sheet.idOrder);
           break;
         case 'CheckBox':
           var element = Element.fromJson(jsonDecode(json));
-          database.addCheckBox((element as CheckBox).text, element.isChecked, element.idParent, element.idOrder);
+          await database.addCheckBox((element as CheckBox).text, element.isChecked, element.idParent, element.idOrder);
           break;
         case 'Images':
           var element = Element.fromJson(jsonDecode(json));
-          database.addImage((element as Images).data, element.idParent, element.idOrder);
+          await database.addImage((element as Images).data, element.idParent, element.idOrder);
           break;
         case 'Texts':
           var element = Element.fromJson(jsonDecode(json));
-          database.addTexts((element as Texts).text, element.txtType.index, element.idParent, element.idOrder);
+          await database.addTexts((element as Texts).text, element.txtType.index, element.idParent, element.idOrder);
           break;
         default:
           throw Exception('(Server)_addObject: Wrong type -> $type');
@@ -228,22 +228,21 @@ class Server{
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
       var idItem = int.parse(await socket.readAsym());
-      print('idItem: $idItem');
       switch(type){
         case 'Cell':
-          database.deleteCell(idItem);
+          await database.deleteCell(idItem);
           break;
         case 'Sheet':
-          database.deleteSheet(idItem);
+          await database.deleteSheet(idItem);
           break;
         case 'CheckBox':
-          database.deleteCheckBox(idItem);
+          await database.deleteCheckBox(idItem);
           break;
         case 'Images':
-          database.deleteImage(idItem);
+          await database.deleteImage(idItem);
           break;
         case 'Texts':
-          database.deleteTexts(idItem);
+          await database.deleteTexts(idItem);
           break;
         default:
           throw Exception('Wrong object type');
@@ -318,7 +317,7 @@ class Server{
       await socket.writeAsym('failed');
       print('(Server)_updateObject:\n$e');
     }
-    on SocketException catch(e){ print('(Server)_updateObject: Connection lost with ${e.address}'); }
+    on SocketException catch(e){ print('(Server)_updateOrder: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
       print('(Server)_updateObject:\n$e');
@@ -349,20 +348,20 @@ class Server{
     }
     on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\nEncryption Exception');
+      print('(Server)_updateOrder:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\n$e');
+      print('(Server)_updateOrder:\n$e');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\n$e');
+      print('(Server)_updateOrder:\n$e');
     }
     on SocketException catch(e){ print('(Server)_updateObject: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\n$e');
+      print('(Server)_updateOrder:\n$e');
     }
   }
 
@@ -378,19 +377,19 @@ class Server{
   }
 
   ///Convert a [jsonList] into a list of [Sheet]
-  List<Sheet> jsonToSheets(List<Map<String, dynamic>> jsonList){
+  List<Sheet> jsonToSheets(var jsonList){
     var sheets = <Sheet>[];
     for(var i = 0; i < jsonList.length; i++){
-      sheets.add(Sheet.fromJson(jsonList[i]));
+      sheets.add(Sheet.fromJson(jsonDecode(jsonList[i])));
     }
     return sheets;
   }
 
   ///Convert a [jsonList] into a list of [Element]
-  List<Element> jsonToElements(List<Map<String, dynamic>> jsonList){
+  List<Element> jsonToElements(var jsonList){
     var elements = <Element>[];
     for(var i = 0; i < jsonList.length; i++){
-      elements.add(Element.fromJson(jsonList[i]));
+      elements.add(Element.fromJson(jsonDecode(jsonList[i])));
     }
     return elements;
   }
