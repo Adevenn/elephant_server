@@ -147,7 +147,7 @@ class Server{
       var database = await socket.setup();
       var jsonObj = jsonDecode(await socket.readSym());
       var cell = Cell.fromJson(jsonObj);
-      database.addCell(cell.title, cell.subtitle, cell.type);
+      await database.addCell(cell.title, cell.subtitle, cell.type);
       await socket.writeAsym('success');
       print('success');
     }
@@ -178,6 +178,7 @@ class Server{
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readSym());
+      //TODO: Optimisation => send only necessary infos (need tests)
       switch(type){
         case 'Sheet':
           var sheet = Sheet.fromJson(jsonDecode(json));
@@ -185,15 +186,15 @@ class Server{
           break;
         case 'CheckBox':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addCheckBox((element as CheckBox).text, element.isChecked, element.idParent, element.idOrder);
+          await database.addCheckBox(element.idParent);
           break;
         case 'Images':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addImage((element as Images).data, element.idParent, element.idOrder);
+          await database.addImage((element as Images).data, element.idParent);
           break;
         case 'Texts':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addTexts((element as Texts).text, element.txtType.index, element.idParent, element.idOrder);
+          await database.addTexts((element as Texts).txtType.index, element.idParent);
           break;
         default:
           throw Exception('(Server)_addObject: Wrong type -> $type');
