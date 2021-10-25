@@ -186,7 +186,7 @@ class Server{
           break;
         case 'CheckBox':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addCheckBox(element.idParent);
+          await database.addCheckbox(element.idParent);
           break;
         case 'Images':
           var element = Element.fromJson(jsonDecode(json));
@@ -194,7 +194,7 @@ class Server{
           break;
         case 'Texts':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addTexts((element as Texts).txtType.index, element.idParent);
+          await database.addText((element as Texts).txtType.index, element.idParent);
           break;
         default:
           throw Exception('(Server)_addObject: Wrong type -> $type');
@@ -204,20 +204,20 @@ class Server{
     }
     on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\nEncryption Exception');
+      print('(Server)_addItem:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\n$e');
+      print('(Server)_addItem:\n$e');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\n$e');
+      print('(Server)_addItem:\n$e');
     }
-    on SocketException catch(e){ print('(Server)_addObject: Connection lost with ${e.address}'); }
+    on SocketException catch(e){ print('(Server)_addItem: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addObject:\n$e');
+      print('(Server)_addItem:\n$e');
     }
   }
 
@@ -236,14 +236,8 @@ class Server{
         case 'Sheet':
           await database.deleteSheet(idItem);
           break;
-        case 'CheckBox':
-          await database.deleteCheckBox(idItem);
-          break;
-        case 'Images':
-          await database.deleteImage(idItem);
-          break;
-        case 'Texts':
-          await database.deleteTexts(idItem);
+        case 'Element':
+          await database.deleteElement(idItem);
           break;
         default:
           throw Exception('Wrong object type');
@@ -253,20 +247,20 @@ class Server{
     }
     on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_deleteObject:\nEncryption Exception');
+      print('(Server)_deleteItem:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_deleteObject:\n$e');
+      print('(Server)_deleteItem:\n$e');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_deleteObject:\n$e');
+      print('(Server)_deleteItem:\n$e');
     }
-    on SocketException catch(e){ print('(Server)_deleteObject: Connection lost with ${e.address}'); }
+    on SocketException catch(e){ print('(Server)_deleteItem: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_deleteObject:\n$e');
+      print('(Server)_deleteItem:\n$e');
     }
   }
 
@@ -308,20 +302,20 @@ class Server{
     }
     on EncryptionException{
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\nEncryption Exception');
+      print('(Server)_updateItem:\nEncryption Exception');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\n$e');
+      print('(Server)_updateItem:\n$e');
     }
     on DatabaseTimeoutException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\n$e');
+      print('(Server)_updateItem:\n$e');
     }
-    on SocketException catch(e){ print('(Server)_updateOrder: Connection lost with ${e.address}'); }
+    on SocketException catch(e){ print('(Server)_updateItem: Connection lost with ${e.address}'); }
     catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_updateObject:\n$e');
+      print('(Server)_updateItem:\n$e');
     }
   }
 
