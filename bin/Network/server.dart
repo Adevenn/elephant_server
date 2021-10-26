@@ -326,17 +326,16 @@ class Server{
       await socket.synchronizeWrite();
       var jsonList = jsonDecode(await socket.readSym());
 
-      switch(type){
-        case 'sheet':
-          var sheets = jsonToSheets(jsonList);
-          await database.updateSheetOrder(sheets);
-          break;
-        case 'element':
-          var elements = jsonToElements(jsonList);
-          await database.updateElementOrder(elements);
-          break;
-        default:
-          throw Exception('Wrong object type');
+      if(type == 'sheet'){
+        var sheets = jsonToSheets(jsonList);
+        await database.updateSheetOrder(sheets);
+      }
+      else if(type == 'element'){
+        var elements = jsonToElements(jsonList);
+        await database.updateElementOrder(elements);
+      }
+      else{
+        throw Exception('Wrong object type');
       }
       await socket.writeAsym('success');
       print('success');

@@ -31,7 +31,7 @@ class Database{
     var isSort = true;
     while(true){
       for(var i = 1; i < elements.length; i++){
-        if(elements[i].idOrder > elements[i-1].idOrder){
+        if(elements[i].idOrder < elements[i-1].idOrder){
           var elem = elements[i];
           elements[i] = elements[i-1];
           elements[i-1] = elem;
@@ -124,9 +124,9 @@ class Database{
       var elems = <Element>[];
       PostgreSQLResult checkboxes, images, texts;
       await _initConnection();
-      checkboxes = await _connection.query('SELECT id, text, ischeck, idorder FROM checkbox WHERE idparent = $idSheet ORDER BY idorder;');
-      images = await _connection.query('SELECT id, data, idorder FROM image WHERE idparent = $idSheet ORDER BY idorder;');
-      texts = await _connection.query('SELECT id, text, type, idorder FROM texts WHERE idparent = $idSheet ORDER BY idorder;');
+      checkboxes = await _connection.query('SELECT id, text, is_checked, elem_order FROM checkbox WHERE id_sheet = $idSheet ORDER BY elem_order;');
+      images = await _connection.query('SELECT id, data, elem_order FROM image WHERE id_sheet = $idSheet ORDER BY elem_order;');
+      texts = await _connection.query('SELECT id, text, type, elem_order FROM text WHERE id_sheet = $idSheet ORDER BY elem_order;');
       await _connection.close();
 
       //Extract data from db values and create objects
@@ -145,7 +145,7 @@ class Database{
       }
       return elems;
     }
-    on PostgreSQLException { throw DatabaseException('(Database)'); }
+    on PostgreSQLException catch(e){ throw DatabaseException('(Database)selectElements:\n$e'); }
     catch(e) { throw Exception(e); }
   }
 
@@ -223,16 +223,17 @@ class Database{
   Future<void> deleteSheet(int idSheet) async{
     try{
       await _initConnection();
-      var sheets = <Sheet>[];
-      var sheetsRaw = await _connection.query('SELECT * from deletesheet(CAST($idSheet as bigint));');
+      var ids = <int>[], orders = <int>[];
+      var sheetsRaw = await _connection.query('SELECT * from delete_sheet(CAST($idSheet as bigint));');
       for(var row in sheetsRaw){
-        sheets.add(Sheet(row[0] as int, row[1] as int, row[2] as String, row[3] as String, row[4] as int));
+        ids.add(row[0] as int);
+        orders.add(row[1] as int);
       }
       //Sort sheets
-      if(sheets.length > 1){
-        for(var i = 0; i < sheets.length; i++){
-          if(sheets[i].idOrder != i){
-            await _connection.query('UPDATE sheet SET idorder = $i WHERE sheet.id = ${sheets[i].id};');
+      if(ids.length > 1){
+        for(var i = 0; i < ids.length; i++){
+          if(orders[i] != i){
+            await _connection.query('UPDATE sheet SET idorder = $i WHERE sheet.id = ${ids[i]};');
           }
         }
       }
@@ -242,9 +243,16 @@ class Database{
 
   Future<void> deleteElement(int idElement) async{
     try{
+      var ids = <int>[], orders = <int>[];
       await _initConnection();
-      //TODO: Reorder elements
-      var elementsRaw = await _connection.query('SELECT delete_element(CAST($idElement as bigint));');
+      var elementsRaw = await _connection.query('SELECT * from delete_element(CAST($idElement as bigint));');
+      if(elementsRaw.length > 1){
+        for(var row in elementsRaw){
+          ids.add(row[0] as int);
+          orders.add(row[1] as int);
+        }
+        await updateDatabaseElementOrder(ids, orders);
+      }
       await _connection.close();
     }
     catch(e) { throw DatabaseException('(Database)deleteElement:\n$e'); }
@@ -271,7 +279,7 @@ class Database{
   void updateCheckBox(int id, bool isCheck, String text, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("UPDATE checkbox SET ischeck = $isCheck, text = '$text', idorder = $idOrder WHERE id = $id;");
+      await _connection.query("UPDATE checkbox SET is_checked = $isCheck, text = '$text', elem_order = $idOrder WHERE id = $id;");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
@@ -279,7 +287,7 @@ class Database{
   void updateImage(int id, Uint8List data, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query('UPDATE image SET data = $data, idorder = $idOrder WHERE id = $id;');
+      await _connection.query('UPDATE image SET data = $data, elem_order = $idOrder WHERE id = $id;');
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateImage: Connection lost\n$e'); }
   }
@@ -287,7 +295,7 @@ class Database{
   void updateTexts(int id, String text, int type, int idOrder) async {
     try {
       await _initConnection();
-      await _connection.query("UPDATE texts SET text = '$text', type = $type, idorder = $idOrder WHERE id = $id;");
+      await _connection.query("UPDATE text SET text = '$text', type = $type, elem_order = $idOrder WHERE id = $id;");
       await _connection.close();
     } catch (e) { throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
@@ -296,7 +304,9 @@ class Database{
     try{
       await _initConnection();
       for(var i = 0; i < sheets.length; i++){
-        await _connection.query('UPDATE sheet SET idorder = ${sheets[i].idOrder} WHERE id = ${sheets[i].id}');
+        if(sheets[i].idOrder != i){
+          await _connection.query('UPDATE sheet SET idorder = ${sheets[i].idOrder} WHERE id = ${sheets[i].id}');
+        }
       }
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)updateSheetOrder:\n$e'); }
@@ -304,13 +314,23 @@ class Database{
 
   Future<void> updateElementOrder(List<Element> elements) async{
     try{
-      await _initConnection();
+      var ids = <int>[], orders = <int>[];
       for(var i = 0; i < elements.length; i++){
-        //TODO query
-        await _connection.query('');
+        ids.add(elements[i].id);
+        orders.add(elements[i].idOrder);
       }
+      await _initConnection();
+      await updateDatabaseElementOrder(ids, orders);
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)updateElementOrder:\n$e'); }
+  }
+
+  Future<void> updateDatabaseElementOrder(List<int> ids, List<int> orders) async{
+    for(var i = 0; i < ids.length; i++){
+      if(orders[i] != i){
+        await _connection.query('UPDATE element SET elem_order = $i WHERE id = ${ids[i]};');
+      }
+    }
   }
 }
 
