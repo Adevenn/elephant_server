@@ -6,8 +6,8 @@ import '../Exception/encryption_exception.dart';
 import '../Model/cell.dart';
 import '../Model/Elements/checkbox.dart';
 import '../Model/Elements/element.dart';
-import '../Model/Elements/images.dart';
-import '../Model/Elements/texts.dart';
+import '../Model/Elements/image.dart';
+import '../Model/Elements/text.dart';
 import '../Model/sheet.dart';
 import 'Encryption/asym_encryption.dart';
 import 'socket_custom.dart';
@@ -184,17 +184,17 @@ class Server{
           var sheet = Sheet.fromJson(jsonDecode(json));
           await database.addSheet(sheet.idParent, sheet.title, sheet.subtitle, sheet.idOrder);
           break;
-        case 'CheckBox':
+        case 'Checkbox':
           var element = Element.fromJson(jsonDecode(json));
           await database.addCheckbox(element.idParent);
           break;
-        case 'Images':
+        case 'Image':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addImage((element as Images).data, element.idParent);
+          await database.addImage((element as Image).data, element.idParent);
           break;
-        case 'Texts':
+        case 'Text':
           var element = Element.fromJson(jsonDecode(json));
-          await database.addText((element as Texts).txtType.index, element.idParent);
+          await database.addText((element as Text).txtType.index, element.idParent);
           break;
         default:
           throw Exception('(Server)_addObject: Wrong type -> $type');
@@ -284,15 +284,15 @@ class Server{
           break;
         case 'Checkbox':
           var elem = Element.fromJson(json);
-          database.updateCheckBox((elem as CheckBox).id, elem.isChecked, elem.text, elem.idOrder);
+          database.updateCheckBox((elem as Checkbox).id, elem.isChecked, elem.text, elem.idOrder);
           break;
-        case 'Images':
+        case 'Image':
           var elem = Element.fromJson(json);
-          database.updateImage((elem as Images).id, elem.data, elem.idOrder);
+          database.updateImage((elem as Image).id, elem.data, elem.idOrder);
           break;
-        case 'Texts':
+        case 'Text':
           var elem = Element.fromJson(json);
-          database.updateTexts((elem as Texts).id, elem.text, elem.txtType.index, elem.idOrder);
+          database.updateTexts((elem as Text).id, elem.text, elem.txtType.index, elem.idOrder);
           break;
         default:
           throw Exception('Wrong object type');
@@ -326,11 +326,11 @@ class Server{
       await socket.synchronizeWrite();
       var jsonList = jsonDecode(await socket.readSym());
 
-      if(type == 'sheet'){
+      if(type == 'Sheet'){
         var sheets = jsonToSheets(jsonList);
         await database.updateSheetOrder(sheets);
       }
-      else if(type == 'element'){
+      else if(type == 'Element'){
         var elements = jsonToElements(jsonList);
         await database.updateElementOrder(elements);
       }

@@ -9,9 +9,9 @@ import '../Model/CellComponents/ranking.dart';
 import '../Model/CellComponents/to_do_list.dart';
 import '../Model/Elements/checkbox.dart';
 import '../Model/Elements/element.dart';
-import '../Model/Elements/images.dart';
+import '../Model/Elements/image.dart';
 import '../Model/Elements/text_type.dart';
-import '../Model/Elements/texts.dart';
+import '../Model/Elements/text.dart';
 import '../Model/sheet.dart';
 
 class Database{
@@ -131,13 +131,13 @@ class Database{
 
       //Extract data from db values and create objects
       for(final elem in checkboxes) {
-        elems.add(CheckBox(id: elem[0] as int, idParent: idSheet, text: elem[1] as String, isChecked: elem[2] as bool, idOrder: elem[3] as int));
+        elems.add(Checkbox(id: elem[0] as int, idParent: idSheet, text: elem[1] as String, isChecked: elem[2] as bool, idOrder: elem[3] as int));
       }
       for(final elem in images) {
-        elems.add(Images(id: elem[0] as int, idParent: idSheet,data: elem[1] as Uint8List, idOrder: elem[2] as int));
+        elems.add(Image(id: elem[0] as int, idParent: idSheet,data: elem[1] as Uint8List, idOrder: elem[2] as int));
       }
       for(final elem in texts) {
-        elems.add(Texts(id: elem[0] as int, idParent: idSheet,text: elem[1] as String, txtType: TextType.values[elem[2] as int], idOrder: elem[3] as int));
+        elems.add(Text(id: elem[0] as int, idParent: idSheet,text: elem[1] as String, txtType: TextType.values[elem[2] as int], idOrder: elem[3] as int));
       }
 
       if(elems.length > 1){
