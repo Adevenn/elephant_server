@@ -177,23 +177,23 @@ class Server{
       var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
-      var json = jsonDecode(await socket.readSym());
+      var json = jsonDecode(await socket.readBigString());
       //TODO: Optimisation => send only necessary infos (need tests)
       switch(type){
         case 'Sheet':
-          var sheet = Sheet.fromJson(jsonDecode(json));
+          var sheet = Sheet.fromJson(json);
           await database.addSheet(sheet.idParent, sheet.title, sheet.subtitle, sheet.idOrder);
           break;
         case 'Checkbox':
-          var element = Element.fromJson(jsonDecode(json));
+          var element = Element.fromJson(json);
           await database.addCheckbox(element.idParent);
           break;
         case 'Image':
-          var element = Element.fromJson(jsonDecode(json));
+          var element = Element.fromJson(json);
           await database.addImage((element as Image).data, element.idParent);
           break;
         case 'Text':
-          var element = Element.fromJson(jsonDecode(json));
+          var element = Element.fromJson(json);
           await database.addText((element as Text).txtType.index, element.idParent);
           break;
         default:
@@ -202,9 +202,9 @@ class Server{
       await socket.writeAsym('success');
       print('success');
     }
-    on EncryptionException{
+    on EncryptionException catch(e){
       await socket.writeAsym('failed');
-      print('(Server)_addItem:\nEncryption Exception');
+      print('(Server)_addItem:\nEncryption Exception\n$e');
     }
     on DatabaseException catch(e){
       await socket.writeAsym('failed');

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:postgres/postgres.dart';
@@ -179,7 +180,7 @@ class Database{
   Future<void> addSheet(int idCell, String title, String subtitle, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("SELECT add_sheet(CAST($idCell as bigint), CAST(\'$title\' as text), CAST(\'$subtitle\' as text));");
+      await _connection.query("SELECT add_sheet($idCell::bigint, \'$title\'::text, \'$subtitle\'::text);");
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
@@ -189,15 +190,22 @@ class Database{
   Future<void> addCheckbox(int idSheet) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT add_checkbox(CAST($idSheet as bigint));');
+      await _connection.query('SELECT add_checkbox($idSheet::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost\n$e'); }
   }
 
+  //Can't store Uint8List directly into postresql
+  //Error: PostgreSQLSeverity.error 42601: syntax error at or near "["
   Future<void> addImage(Uint8List data, int idSheet) async{
     try{
+      var dataMap = {'data':data};
+      var json = jsonEncode(dataMap);
+      print(json);
       await _initConnection();
-      await _connection.query('SELECT add_image(CAST($idSheet as bigint), CAST($data as bytea);');
+      /*await _connection.query('INSERT INTO image (id_sheet, data, elem_order)'
+          ' VALUES ($idSheet::bigint, $data::bytea, 0::integer);');*/
+      await _connection.query('SELECT add_image($idSheet::bigint, \'$json\'::text);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addImage: Connection lost\n$e'); }
   }
@@ -205,7 +213,7 @@ class Database{
   Future<void> addText(int type, int idSheet) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT add_text(CAST($idSheet as bigint), CAST($type as integer));');
+      await _connection.query('SELECT add_text($idSheet::bigint, $type::integer);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)add_text: Connection lost\n$e'); }
   }
@@ -284,7 +292,7 @@ class Database{
     } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
 
-  void updateImage(int id, Uint8List data, int idOrder) async{
+  void updateImage(int id, List<int> data, int idOrder) async{
     try{
       await _initConnection();
       await _connection.query('UPDATE image SET data = $data, elem_order = $idOrder WHERE id = $id;');
