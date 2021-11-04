@@ -135,7 +135,10 @@ class Database{
         elems.add(Checkbox(id: elem[0] as int, idParent: idSheet, text: elem[1] as String, isChecked: elem[2] as bool, idOrder: elem[3] as int));
       }
       for(final elem in images) {
-        elems.add(Image(id: elem[0] as int, idParent: idSheet,data: elem[1] as Uint8List, idOrder: elem[2] as int));
+        var datas = jsonDecode(elem[1]);
+        print(datas);
+
+        elems.add(Image(id: elem[0] as int, idParent: idSheet,data: Uint8List.fromList(datas['data'].cast<int>()), idOrder: elem[2] as int));
       }
       for(final elem in texts) {
         elems.add(Text(id: elem[0] as int, idParent: idSheet,text: elem[1] as String, txtType: TextType.values[elem[2] as int], idOrder: elem[3] as int));

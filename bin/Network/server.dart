@@ -131,7 +131,7 @@ class Server{
       var database = await socket.setup();
       var idSheet = int.parse(await socket.readAsym());
       var elements = await database.selectElements(idSheet);
-      await socket.writeSym(listToJson(elements));
+      await socket.writeBigString(listToJson(elements));
     }
     on SocketException{ print('(Server)_sheetContent:\nSocketException'); }
     on EncryptionException{ print('(Server)_sheetContent:\nEncryption Exception'); }
