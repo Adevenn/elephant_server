@@ -136,8 +136,6 @@ class Database{
       }
       for(final elem in images) {
         var datas = jsonDecode(elem[1]);
-        print(datas);
-
         elems.add(Image(id: elem[0] as int, idParent: idSheet,data: Uint8List.fromList(datas['data'].cast<int>()), idOrder: elem[2] as int));
       }
       for(final elem in texts) {
@@ -198,16 +196,11 @@ class Database{
     } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost\n$e'); }
   }
 
-  //Can't store Uint8List directly into postresql
-  //Error: PostgreSQLSeverity.error 42601: syntax error at or near "["
   Future<void> addImage(Uint8List data, int idSheet) async{
     try{
-      var dataMap = {'data':data};
+      var dataMap = {'data' : data};
       var json = jsonEncode(dataMap);
-      print(json);
       await _initConnection();
-      /*await _connection.query('INSERT INTO image (id_sheet, data, elem_order)'
-          ' VALUES ($idSheet::bigint, $data::bytea, 0::integer);');*/
       await _connection.query('SELECT add_image($idSheet::bigint, \'$json\'::text);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addImage: Connection lost\n$e'); }
