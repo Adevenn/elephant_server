@@ -101,7 +101,7 @@ class Server{
       var database = await socket.setup();
       var matchWord = await socket.readAsym();
       var cells = await database.selectCells(matchWord);
-      await socket.writeSym(listToJson(cells));
+      await socket.writeBigString(listToJson(cells));
     }
     on SocketException{ print('(Server)_cells: Client disconnected'); }
     on EncryptionException{ print('(Server)_cells:\nEncryption Exception'); }
@@ -116,12 +116,12 @@ class Server{
       var database = await socket.setup();
       var idCell = int.parse(await socket.readAsym());
       var sheets = await database.selectSheets(idCell);
-      await socket.writeSym(listToJson(sheets));
+      await socket.writeBigString(listToJson(sheets));
     }
-    on SocketException{ print('(Server)_cellContent:\nSocketException'); }
-    on EncryptionException{ print('(Server)_cellContent:\nEncryption Exception'); }
-    on DatabaseException catch(e) { print('(Server)_cellContent:\n$e'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_cellContent:\n$e'); }
+    on SocketException{ print('(Server)_sheets:\nSocketException'); }
+    on EncryptionException{ print('(Server)_sheets:\nEncryption Exception'); }
+    on DatabaseException catch(e) { print('(Server)_sheets:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_sheets:\n$e'); }
     catch(e){ print('Connection lost with host during cellContent\n$e'); }
   }
 
@@ -133,10 +133,10 @@ class Server{
       var elements = await database.selectElements(idSheet);
       await socket.writeBigString(listToJson(elements));
     }
-    on SocketException{ print('(Server)_sheetContent:\nSocketException'); }
-    on EncryptionException{ print('(Server)_sheetContent:\nEncryption Exception'); }
-    on DatabaseException catch(e) { print('(Server)_sheetContent:\n$e'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_sheetContent:\n$e'); }
+    on SocketException{ print('(Server)_elements:\nSocketException'); }
+    on EncryptionException{ print('(Server)_elements:\nEncryption Exception'); }
+    on DatabaseException catch(e) { print('(Server)_elements:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_elements:\n$e'); }
     catch(e){ print('(Server)_sheetContent:\n$e'); }
   }
 
@@ -265,13 +265,14 @@ class Server{
   }
 
   ///Receive a type and a json
+  ///
   ///Call database to update the jsonObject
   Future<void> _updateItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
-      var json = jsonDecode(await socket.readSym());
+      var json = jsonDecode(await socket.readBigString());
       print('json: $json');
       switch(type){
         case 'Cell':
@@ -324,7 +325,7 @@ class Server{
       var database = await socket.setup();
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
-      var jsonList = jsonDecode(await socket.readSym());
+      var jsonList = jsonDecode(await socket.readBigString());
 
       if(type == 'Sheet'){
         var sheets = jsonToSheets(jsonList);
