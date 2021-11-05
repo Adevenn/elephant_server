@@ -36,8 +36,16 @@ class SocketCustom{
     catch(e){ throw Exception(e); }
   }
 
-  Future<void> init() async{
-    try{ _socket.write(_asym.publicKey); }
+  Future<Database> init() async{
+    try{
+      _socket.write(_asym.publicKey);
+
+      //Key Exchange
+      _sym = SymEncryption(await readAsym());
+      await synchronizeWrite();
+
+      return await _dbValues();
+    }
     on SocketException catch(e){ throw SocketException('(CustomSocket)init: Connection lost with ${_socket.address}\n$e'); }
     on EncryptionException catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)init: Connection lost with host\n$e'); }
