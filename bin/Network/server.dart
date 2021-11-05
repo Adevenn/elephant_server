@@ -208,9 +208,9 @@ class Server{
   Future<void> _deleteItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
-      var type = await socket.readAsym();
+      var type = await socket.readSym();
       await socket.synchronizeWrite();
-      var idItem = int.parse(await socket.readAsym());
+      var idItem = int.parse(await socket.readSym());
       switch(type){
         case 'Cell':
           await database.deleteCell(idItem);
