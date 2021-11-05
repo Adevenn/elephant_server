@@ -81,6 +81,7 @@ class Server{
   Future<void> _cells(SocketCustom socket) async {
     try{
       var database = await socket.setup();
+      //Asym because matchWord could be null ('')
       var matchWord = await socket.readAsym();
       var cells = await database.selectCells(matchWord);
       await socket.writeBigString(listToJson(cells));
@@ -130,24 +131,24 @@ class Server{
       var jsonObj = jsonDecode(await socket.readSym());
       var cell = Cell.fromJson(jsonObj);
       await database.addCell(cell.title, cell.subtitle, cell.type);
-      await socket.writeAsym('success');
+      await socket.writeSym('success');
       print('success');
     }
     on EncryptionException{
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addCell\nEncryption Exception');
     }
     on DatabaseException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addCell:\n$e');
     }
     on DatabaseTimeoutException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addCell:\n$e');
     }
     on SocketException catch(e){ print('(Server)_addCell: Connection lost with ${e.address}'); }
     catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addCell:\n$e');
     }
   }
@@ -181,24 +182,24 @@ class Server{
         default:
           throw Exception('(Server)_addItem: Wrong type -> $type');
       }
-      await socket.writeAsym('success');
+      await socket.writeSym('success');
       print('success');
     }
     on EncryptionException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addItem:\nEncryption Exception\n$e');
     }
     on DatabaseException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addItem:\n$e');
     }
     on DatabaseTimeoutException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addItem:\n$e');
     }
     on SocketException catch(e){ print('(Server)_addItem: Connection lost with ${e.address}'); }
     catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_addItem:\n$e');
     }
   }
@@ -224,24 +225,24 @@ class Server{
         default:
           throw Exception('Wrong object type');
       }
-      await socket.writeAsym('success');
+      await socket.writeSym('success');
       print('success');
     }
     on EncryptionException{
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_deleteItem:\nEncryption Exception');
     }
     on DatabaseException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_deleteItem:\n$e');
     }
     on DatabaseTimeoutException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_deleteItem:\n$e');
     }
     on SocketException catch(e){ print('(Server)_deleteItem: Connection lost with ${e.address}'); }
     catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_deleteItem:\n$e');
     }
   }
@@ -279,24 +280,24 @@ class Server{
         default:
           throw Exception('Wrong object type');
       }
-      await socket.writeAsym('success');
+      await socket.writeSym('success');
       print('success');
     }
     on EncryptionException{
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateItem:\nEncryption Exception');
     }
     on DatabaseException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateItem:\n$e');
     }
     on DatabaseTimeoutException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateItem:\n$e');
     }
     on SocketException catch(e){ print('(Server)_updateItem: Connection lost with ${e.address}'); }
     catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateItem:\n$e');
     }
   }
@@ -319,24 +320,24 @@ class Server{
       else{
         throw Exception('Wrong object type');
       }
-      await socket.writeAsym('success');
+      await socket.writeSym('success');
       print('success');
     }
     on EncryptionException{
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateOrder:\nEncryption Exception');
     }
     on DatabaseException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateOrder:\n$e');
     }
     on DatabaseTimeoutException catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateOrder:\n$e');
     }
     on SocketException catch(e){ print('(Server)_updateObject: Connection lost with ${e.address}'); }
     catch(e){
-      await socket.writeAsym('failed');
+      await socket.writeSym('failed');
       print('(Server)_updateOrder:\n$e');
     }
   }

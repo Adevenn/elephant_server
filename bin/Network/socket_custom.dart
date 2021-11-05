@@ -51,9 +51,6 @@ class SocketCustom{
       _sym = SymEncryption(await readAsym());
       await synchronizeWrite();
 
-      _asym.clientKey = await readSym();
-      await synchronizeWrite();
-
       return await _dbValues();
     }
     on SocketException catch(e){ throw SocketException('(CustomSocket)setup: Connection lost with ${_socket.address}\n$e'); }
@@ -69,19 +66,14 @@ class SocketCustom{
     }
     on SocketException catch(e){ print('(SocketCustom)disconnect:\n$e'); }
     catch(e) { throw Exception(e); }
-    finally{
-      _socket.destroy();
-    }
+    finally{ _socket.destroy(); }
   }
 
   Future<void> writeBigString(String file) async{
     try{
       await writeSym(file);
       await write('--- end of file ---');
-    }
-    catch(e){
-      throw Exception(e);
-    }
+    } catch(e){ throw Exception(e); }
   }
 
   Future<String> readBigString() async{
@@ -94,22 +86,13 @@ class SocketCustom{
         }
       }
       return _sym.decryptString(file.substring(0, file.length - 19));
-    }
-    catch(e){
-      throw Exception(e);
-    }
+    } catch(e){ throw Exception(e); }
   }
 
   Future<void> write(String plainText) async{
     try{ _socket.write(plainText); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)write\n$e'); }
     catch (e){ throw Exception('(CustomSocket)write:\n$e'); }
-  }
-
-  Future<void> writeAsym(String plainText) async{
-    try{ _socket.write(_asym.encrypt(plainText)); }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)writeAsym:\n$e'); }
-    catch(e){ throw Exception('(CustomSocket)writeAsym:\n$e'); }
   }
 
   Future<void> writeSym(String plainText) async{
