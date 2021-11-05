@@ -28,7 +28,7 @@ class SocketCustom{
   ///Receive databaseName, username and password
   Future<Database> _dbValues() async{
     try{
-      var dbValues = jsonDecode(await readAsym());
+      var dbValues = jsonDecode(await readSym());
       await synchronizeWrite();
       return Database(_ipDatabase, _portDatabase, dbValues['database'], dbValues['username'], dbValues['password']);
     }
