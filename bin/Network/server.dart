@@ -252,7 +252,7 @@ class Server{
   Future<void> _updateItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
-      var type = await socket.readAsym();
+      var type = await socket.readSym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readBigString());
       switch(type){
@@ -304,7 +304,7 @@ class Server{
   Future<void> _updateOrder(SocketCustom socket) async {
     try{
       var database = await socket.setup();
-      var type = await socket.readAsym();
+      var type = await socket.readSym();
       await socket.synchronizeWrite();
       var jsonList = jsonDecode(await socket.readBigString());
 
