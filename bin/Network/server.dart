@@ -118,11 +118,11 @@ class Server{
       var sheets = await database.selectSheets(idCell);
       await socket.writeSym(listToJson(sheets));
     }
-    on SocketException{ print('(Server)_cellContent:\nSocketException'); }
-    on EncryptionException{ print('(Server)_cellContent:\nEncryption Exception'); }
-    on DatabaseException catch(e) { print('(Server)_cellContent:\n$e'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_cellContent:\n$e'); }
-    catch(e){ print('Connection lost with host during cellContent\n$e'); }
+    on SocketException{ print('(Server)_sheets:\nSocketException'); }
+    on EncryptionException{ print('(Server)_sheets:\nEncryption Exception'); }
+    on DatabaseException catch(e) { print('(Server)_sheets:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_sheets:\n$e'); }
+    catch(e){ print('(Server)_sheets: Connection lost with host during cellContent\n$e'); }
   }
 
   ///Get the sheet content from database
@@ -133,11 +133,11 @@ class Server{
       var elements = await database.selectElements(idSheet);
       await socket.writeSym(listToJson(elements));
     }
-    on SocketException{ print('(Server)_sheetContent:\nSocketException'); }
-    on EncryptionException{ print('(Server)_sheetContent:\nEncryption Exception'); }
-    on DatabaseException catch(e) { print('(Server)_sheetContent:\n$e'); }
-    on DatabaseTimeoutException catch(e) { print('(Server)_sheetContent:\n$e'); }
-    catch(e){ print('(Server)_sheetContent:\n$e'); }
+    on SocketException{ print('(Server)_elements:\nSocketException'); }
+    on EncryptionException{ print('(Server)_elements:\nEncryption Exception'); }
+    on DatabaseException catch(e) { print('(Server)_elements:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_elements:\n$e'); }
+    catch(e){ print('(Server)_elements:\n$e'); }
   }
 
   ///Receive a json containing a Cell
@@ -197,7 +197,7 @@ class Server{
           await database.addText((element as Text).txtType.index, element.idParent);
           break;
         default:
-          throw Exception('(Server)_addObject: Wrong type -> $type');
+          throw Exception('(Server)_addItem: Wrong type -> $type');
       }
       await socket.writeAsym('success');
       print('success');
