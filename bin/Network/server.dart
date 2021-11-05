@@ -32,11 +32,10 @@ class Server{
   }
 
   void _handleClient(Socket _socket) async{
-    print('/* New client connection */');
     var socket = SocketCustom(_socket, _asym, _ipDatabase, _portDatabase);
     try{
       var request = await socket.read();
-      print('Request: $request');
+      print('/* New request: $request */');
       switch(request){
         case 'init':
           await _init(socket);
@@ -72,7 +71,7 @@ class Server{
     }
     catch(e){ print('(Server)_handleClient:\n$e'); }
     await socket.disconnect();
-    print('Client disconnected');
+    print('--- Client disconnected ---');
   }
 
   ///Try to connect to database
