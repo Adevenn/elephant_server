@@ -96,7 +96,7 @@ class Server{
   Future<void> _sheets(SocketCustom socket) async {
     try{
       var database = await socket.setup();
-      var idCell = int.parse(await socket.readAsym());
+      var idCell = int.parse(await socket.readSym());
       var sheets = await database.selectSheets(idCell);
       await socket.writeBigString(listToJson(sheets));
     }
@@ -111,7 +111,7 @@ class Server{
   Future<void> _elements(SocketCustom socket) async{
     try{
       var database = await socket.setup();
-      var idSheet = int.parse(await socket.readAsym());
+      var idSheet = int.parse(await socket.readSym());
       var elements = await database.selectElements(idSheet);
       await socket.writeBigString(listToJson(elements));
     }
@@ -255,7 +255,6 @@ class Server{
       var type = await socket.readAsym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readBigString());
-      print('json: $json');
       switch(type){
         case 'Cell':
           var cell = Cell.fromJson(json);
