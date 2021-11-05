@@ -122,7 +122,7 @@ class Server{
     on EncryptionException{ print('(Server)_sheets:\nEncryption Exception'); }
     on DatabaseException catch(e) { print('(Server)_sheets:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_sheets:\n$e'); }
-    catch(e){ print('(Server)_sheets: Connection lost with host during cellContent\n$e'); }
+    catch(e){ print('(Server)_sheets:\n$e'); }
   }
 
   ///Get the sheet content from database
