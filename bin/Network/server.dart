@@ -157,7 +157,7 @@ class Server{
   Future<void> _addItem(SocketCustom socket) async{
     try{
       var database = await socket.setup();
-      var type = await socket.readAsym();
+      var type = await socket.readSym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readBigString());
       //TODO: Optimisation => send only necessary infos (need tests)
