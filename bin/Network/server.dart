@@ -39,7 +39,7 @@ class Server{
       print('Request: $request');
       switch(request){
         case 'init':
-          await _init(socket);
+          await socket.init();
           break;
         case 'cells':
           await _cells(socket);
@@ -73,24 +73,6 @@ class Server{
     catch(e){ print('(Server)_handleClient:\n$e'); }
     await socket.disconnect();
     print('Client disconnected');
-  }
-
-  ///Try to connect to database
-  Future<void> _init(SocketCustom socket) async{
-    try{
-      var database = await socket.init();
-      await database.testConnection();
-      await socket.write('success');
-    }
-    on DatabaseTimeoutException catch(e){
-      await socket.write('databaseTimeout');
-      print('(Server)_init:\n$e');
-    }
-    on SocketException{ print('(Server)_init: Connection lost with '); }
-    catch(e){
-      await socket.write('failed');
-      print('(Server)_init:\n$e');
-    }
   }
 
   ///Get cells from database and send it to client with [socket]

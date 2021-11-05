@@ -36,11 +36,8 @@ class SocketCustom{
     catch(e){ throw Exception(e); }
   }
 
-  Future<Database> init() async{
-    try{
-      _socket.write(_asym.publicKey);
-      return await _dbValues();
-    }
+  Future<void> init() async{
+    try{ _socket.write(_asym.publicKey); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)init: Connection lost with ${_socket.address}\n$e'); }
     on EncryptionException catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
     catch(e){ throw Exception('(CustomSocket)init: Connection lost with host\n$e'); }
@@ -49,11 +46,14 @@ class SocketCustom{
   Future<Database> setup() async{
     try{
       await synchronizeWrite();
-      var symKey = await readAsym();
-      _sym = SymEncryption(symKey);
+
+      //Key Exchange
+      _sym = SymEncryption(await readAsym());
       await synchronizeWrite();
+
       _asym.clientKey = await readSym();
       await synchronizeWrite();
+
       return await _dbValues();
     }
     on SocketException catch(e){ throw SocketException('(CustomSocket)setup: Connection lost with ${_socket.address}\n$e'); }
