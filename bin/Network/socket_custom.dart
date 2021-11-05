@@ -30,7 +30,7 @@ class SocketCustom{
       await synchronizeWrite();
       return Database(_ipDatabase, _portDatabase, dbValues['database'], dbValues['username'], dbValues['password']);
     }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n$e'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)_dbValues: Connection lost with ${_socket.address}\n$e'); }
     catch(e){ throw Exception(e); }
   }
 
@@ -39,9 +39,9 @@ class SocketCustom{
       _socket.write(_asym.publicKey);
       return await _dbValues();
     }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)_init: Connection lost with ${_socket.address}\n$e'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)init: Connection lost with ${_socket.address}\n$e'); }
     on EncryptionException catch(e){ throw ClientException('(CustomSocket)init:\n$e'); }
-    catch(e){ throw Exception('(CustomSocket)_init: Connection lost with host\n$e'); }
+    catch(e){ throw Exception('(CustomSocket)init: Connection lost with host\n$e'); }
   }
 
   Future<Database> setup() async{
@@ -54,9 +54,9 @@ class SocketCustom{
       await synchronizeWrite();
       return await _dbValues();
     }
-    on SocketException catch(e){ throw SocketException('(CustomSocket)_setup: Connection lost with ${_socket.address}\n$e'); }
+    on SocketException catch(e){ throw SocketException('(CustomSocket)setup: Connection lost with ${_socket.address}\n$e'); }
     on EncryptionException catch(e){ throw EncryptionException('(SocketCustom)setup:\n$e'); }
-    catch(e){ throw Exception('(CustomSocket)_setup: Connection lost with host\n$e'); }
+    catch(e){ throw Exception('(CustomSocket)setup: Connection lost with host\n$e'); }
   }
 
   ///Disconnect the [_socket] and return an Exception if an error occurs
@@ -75,7 +75,7 @@ class SocketCustom{
   Future<void> write(String plainText) async{
     try{ _socket.write(plainText); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)write\n$e'); }
-    catch (e){ throw Exception('(CustomSocket)synchronizeWrite:\n$e'); }
+    catch (e){ throw Exception('(CustomSocket)write:\n$e'); }
   }
 
   Future<void> writeAsym(String plainText) async{
@@ -99,22 +99,22 @@ class SocketCustom{
   Future<String> read() async{
     try{ return String.fromCharCodes(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)read\n$e'); }
-    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readSym;\n$e'); }
-    catch(e) { throw Exception('(CustomSocket)readAsym;\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)read:\n$e'); }
+    catch(e) { throw Exception('(CustomSocket)read:\n$e'); }
   }
 
   Future<String> readAsym() async{
     try{ return _asym.decrypt(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)readAsym\n$e'); }
-    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readAsym;\n$e'); }
-    catch(e) { throw Exception('(CustomSocket)readAsym;\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readAsym:\n$e'); }
+    catch(e) { throw Exception('(CustomSocket)readAsym:\n$e'); }
   }
 
   Future<String> readSym() async{
     try{ return _sym.decrypt(await _queue.next); }
     on SocketException catch(e){ throw SocketException('(CustomSocket)readSym:\n$e'); }
-    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readSym;\n$e'); }
-    catch(e) { throw Exception('(CustomSocket)readSym;\n$e'); }
+    on EncryptionException catch(e){ throw EncryptionException('(CustomSocket)readSym:\n$e'); }
+    catch(e) { throw Exception('(CustomSocket)readSym:\n$e'); }
   }
 
   Future<void> synchronizeRead() async{
