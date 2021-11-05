@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 
@@ -20,6 +21,7 @@ class SocketCustom{
   final int _portDatabase;
 
   SocketCustom(this._socket, this._asym, this._ipDatabase, this._portDatabase){
+    _socket.timeout(Duration(seconds: 5));
     _queue = StreamQueue(_socket);
   }
 
@@ -69,6 +71,32 @@ class SocketCustom{
     catch(e) { throw Exception(e); }
     finally{
       _socket.destroy();
+    }
+  }
+
+  Future<void> writeBigString(String file) async{
+    try{
+      await writeSym(file);
+      await write('--- end of file ---');
+    }
+    catch(e){
+      throw Exception(e);
+    }
+  }
+
+  Future<String> readBigString() async{
+    try{
+      var file = '';
+      while(true){
+        file += String.fromCharCodes(await _queue.next);
+        if(file.endsWith('--- end of file ---')) {
+          break;
+        }
+      }
+      return _sym.decryptString(file.substring(0, file.length - 19));
+    }
+    catch(e){
+      throw Exception(e);
     }
   }
 
