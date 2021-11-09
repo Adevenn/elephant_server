@@ -135,8 +135,8 @@ class Database{
         elems.add(Checkbox(id: elem[0] as int, idParent: idSheet, text: elem[1] as String, isChecked: elem[2] as bool, idOrder: elem[3] as int));
       }
       for(final elem in images) {
-        var datas = jsonDecode(elem[1]);
-        elems.add(Image(id: elem[0] as int, idParent: idSheet,data: Uint8List.fromList(datas['data'].cast<int>()), idOrder: elem[2] as int));
+        var data = jsonDecode(elem[1]);
+        elems.add(Image(id: elem[0] as int, idParent: idSheet,data: Uint8List.fromList(data['data'].cast<int>()), idOrder: elem[2] as int));
       }
       for(final elem in texts) {
         elems.add(Text(id: elem[0] as int, idParent: idSheet,text: elem[1] as String, txtType: TextType.values[elem[2] as int], idOrder: elem[3] as int));
@@ -172,7 +172,9 @@ class Database{
       await _initConnection();
       await _connection.query("SELECT add_cell(\'$title\'::text, \'$subtitle\'::text, $typeInt::integer);");
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)addCell: Connection lost\n$e'); }
+    }
+    on PostgreSQLException catch(e) { throw DatabaseException('(Database)addCell: Wrong entries\n$e'); }
+    catch(e) { throw DatabaseException('(Database)addCell: Connection lost\n$e'); }
   }
 
   Future<void> addSheet(int idCell, String title, String subtitle, int idOrder) async{
@@ -216,7 +218,7 @@ class Database{
   Future<void> deleteCell(int idCell) async{
     try{
       await _initConnection();
-      await _connection.query('DELETE FROM cell WHERE id = $idCell;');
+      await _connection.query('SELECT delete_cell($idCell::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteCell: Connection lost\n$e'); }
   }
