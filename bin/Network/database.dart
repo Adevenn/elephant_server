@@ -170,10 +170,7 @@ class Database{
           throw Exception('Unexpected cell type');
       }
       await _initConnection();
-      await _connection.query("INSERT INTO cell (title, subtitle, type) VALUES ('$title', '$subtitle', $typeInt);");
-      var idCellRaw = await _connection.query("SELECT id FROM cell WHERE cell.title = '$title';");
-      var idCell = idCellRaw[0][0] as int;
-      await _connection.query("INSERT INTO sheet (idcell, title, subtitle, idorder) VALUES ($idCell, 'New Sheet', '', 0);");
+      await _connection.query("SELECT add_cell(\'$title\'::text, \'$subtitle\'::text, $typeInt::integer);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addCell: Connection lost\n$e'); }
   }
