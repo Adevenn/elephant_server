@@ -162,7 +162,7 @@ class Database{
           throw Exception('Unexpected cell type');
       }
       await _initConnection();
-      await _connection.query("SELECT add_cell('$title'::text, '$subtitle'::text, $typeInt::integer);");
+      await _connection.query("CALL add_cell('$title'::text, '$subtitle'::text, $typeInt::integer);");
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addCell: Wrong entries\n$e'); }
@@ -182,7 +182,7 @@ class Database{
   Future<void> addCheckbox(int idSheet) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT add_checkbox($idSheet::bigint);');
+      await _connection.query('CALL add_checkbox($idSheet::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost\n$e'); }
   }
@@ -191,7 +191,7 @@ class Database{
     try{
       var json = jsonEncode({'data' : data});
       await _initConnection();
-      await _connection.query("SELECT add_image($idSheet::bigint, '$json'::text);");
+      await _connection.query("CALL add_image($idSheet::bigint, '$json'::text);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addImage: Connection lost\n$e'); }
   }
@@ -199,7 +199,7 @@ class Database{
   Future<void> addText(int type, int idSheet) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT add_text($idSheet::bigint, $type::integer);');
+      await _connection.query('CALL add_text($idSheet::bigint, $type::integer);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)add_text: Connection lost\n$e'); }
   }
@@ -209,7 +209,7 @@ class Database{
   Future<void> deleteCell(int idCell) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT delete_cell($idCell::bigint);');
+      await _connection.query('CALL delete_cell($idCell::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteCell: Connection lost\n$e'); }
   }
@@ -217,7 +217,7 @@ class Database{
   Future<void> deleteSheet(int idSheet) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT delete_sheet($idSheet::bigint);');
+      await _connection.query('CALL delete_sheet($idSheet::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost\n$e'); }
   }
@@ -225,7 +225,7 @@ class Database{
   Future<void> deleteElement(int idElement) async{
     try{
       await _initConnection();
-      await _connection.query('SELECT delete_element($idElement::bigint);');
+      await _connection.query('CALL delete_element($idElement::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteElement:\n$e'); }
   }
@@ -235,7 +235,7 @@ class Database{
   void updateCell(int id, String title, String subtitle) async{
     try{
       await _initConnection();
-      await _connection.query("SELECT update_cell($id::bigint, '$title'::text, '$subtitle'::text);");
+      await _connection.query("CALL update_cell($id::bigint, '$title'::text, '$subtitle'::text);");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateCell: Connection lost\n$e'); }
   }
@@ -243,7 +243,7 @@ class Database{
   void updateSheet(int id, String title, String subtitle) async{
     try{
       await _initConnection();
-      await _connection.query("SELECT update_sheet($id::bigint, '$title'::text, '$subtitle'::text);");
+      await _connection.query("CALL update_sheet($id::bigint, '$title'::text, '$subtitle'::text);");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateSheet: Connection lost\n$e'); }
   }
@@ -251,7 +251,7 @@ class Database{
   void updateCheckBox(int id, bool isCheck, String text) async{
     try{
       await _initConnection();
-      await _connection.query("SELECT update_checkbox($id::bigint, $isCheck::boolean, '$text'::text;");
+      await _connection.query("CALL update_checkbox($id::bigint, $isCheck::boolean, '$text'::text;");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
