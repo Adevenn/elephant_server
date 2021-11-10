@@ -29,20 +29,13 @@ class Database{
   }
 
   List<Element> sortByIdOrder(List<Element> elements){
-    var isSort = true;
-    while(true){
-      for(var i = 1; i < elements.length; i++){
-        if(elements[i].idOrder < elements[i-1].idOrder){
-          var elem = elements[i];
-          elements[i] = elements[i-1];
-          elements[i-1] = elem;
-          isSort = false;
-        }
+    for(var i = 1; i < elements.length; i++){
+      if(elements[i].idOrder < elements[i-1].idOrder){
+        var elem = elements[i];
+        elements[i] = elements[i-1];
+        elements[i-1] = elem;
+        i = 0;
       }
-      if(isSort){
-        break;
-      }
-      isSort = true;
     }
     return elements;
   }
@@ -87,8 +80,7 @@ class Database{
         }
       }
       return cells;
-    }
-    catch (e){ throw DatabaseException('(Database)_cellsFromRawValues:\n$e}'); }
+    } catch (e){ throw DatabaseException('(Database)_cellsFromRawValues:\n$e}'); }
   }
 
   Future<List<Cell>> selectCells(String matchWord) async{
@@ -226,20 +218,7 @@ class Database{
   Future<void> deleteSheet(int idSheet) async{
     try{
       await _initConnection();
-      var ids = <int>[], orders = <int>[];
-      var sheetsRaw = await _connection.query('SELECT * from delete_sheet(CAST($idSheet as bigint));');
-      for(var row in sheetsRaw){
-        ids.add(row[0] as int);
-        orders.add(row[1] as int);
-      }
-      //Sort sheets
-      if(ids.length > 1){
-        for(var i = 0; i < ids.length; i++){
-          if(orders[i] != i){
-            await _connection.query('UPDATE sheet SET idorder = $i WHERE sheet.id = ${ids[i]};');
-          }
-        }
-      }
+      await _connection.query('SELECT delete_sheet($idSheet::bigint);');
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)deleteSheet: Connection lost\n$e'); }
   }
