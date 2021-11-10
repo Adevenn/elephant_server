@@ -225,19 +225,10 @@ class Database{
 
   Future<void> deleteElement(int idElement) async{
     try{
-      var ids = <int>[], orders = <int>[];
       await _initConnection();
-      var elementsRaw = await _connection.query('SELECT * from delete_element(CAST($idElement as bigint));');
-      if(elementsRaw.length > 1){
-        for(var row in elementsRaw){
-          ids.add(row[0] as int);
-          orders.add(row[1] as int);
-        }
-        await updateDatabaseElementOrder(ids, orders);
-      }
+      await _connection.query('SELECT delete_element($idElement::bigint);');
       await _connection.close();
-    }
-    catch(e) { throw DatabaseException('(Database)deleteElement:\n$e'); }
+    } catch(e) { throw DatabaseException('(Database)deleteElement:\n$e'); }
   }
 
   /// UPDATE ///
