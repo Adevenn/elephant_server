@@ -107,9 +107,9 @@ class Database{
       }
       return sheets;
     }
-    on PostgreSQLException{ throw DatabaseException(''); }
+    on PostgreSQLException catch(e){ throw DatabaseException('(Database)selectSheets:\n$e'); }
     on TimeoutException { throw DatabaseTimeoutException('(Database)_initConnection: Database disconnected'); }
-    catch(e) { throw DatabaseException('(Database)$e'); }
+    catch(e) { throw DatabaseException('(Database)selectSheets\n$e'); }
   }
 
   Future<List<Element>> selectElements(int idSheet) async{
@@ -162,7 +162,7 @@ class Database{
           throw Exception('Unexpected cell type');
       }
       await _initConnection();
-      await _connection.query("SELECT add_cell(\'$title\'::text, \'$subtitle\'::text, $typeInt::integer);");
+      await _connection.query("SELECT add_cell('$title'::text, '$subtitle'::text, $typeInt::integer);");
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addCell: Wrong entries\n$e'); }
@@ -172,7 +172,7 @@ class Database{
   Future<void> addSheet(int idCell, String title, String subtitle, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("SELECT add_sheet($idCell::bigint, \'$title\'::text, \'$subtitle\'::text);");
+      await _connection.query("SELECT add_sheet($idCell::bigint, '$title'::text, '$subtitle'::text);");
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
@@ -189,10 +189,9 @@ class Database{
 
   Future<void> addImage(Uint8List data, int idSheet) async{
     try{
-      var dataMap = {'data' : data};
-      var json = jsonEncode(dataMap);
+      var json = jsonEncode({'data' : data});
       await _initConnection();
-      await _connection.query('SELECT add_image($idSheet::bigint, \'$json\'::text);');
+      await _connection.query("SELECT add_image($idSheet::bigint, '$json'::text);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addImage: Connection lost\n$e'); }
   }
@@ -236,41 +235,41 @@ class Database{
   void updateCell(int id, String title, String subtitle) async{
     try{
       await _initConnection();
-      await _connection.query("UPDATE cell SET title = '$title', subtitle = '$subtitle' WHERE id = $id;");
+      await _connection.query("SELECT update_cell($id::bigint, '$title'::text, '$subtitle'::text);");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateCell: Connection lost\n$e'); }
   }
 
-  void updateSheet(int id, String title, String subtitle, int idOrder) async{
+  void updateSheet(int id, String title, String subtitle) async{
     try{
       await _initConnection();
-      await _connection.query("UPDATE sheet SET title = '$title', subtitle = '$subtitle', idorder = $idOrder WHERE id = $id;");
+      await _connection.query("SELECT update_sheet($id::bigint, '$title'::text, '$subtitle'::text);");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateSheet: Connection lost\n$e'); }
   }
 
-  void updateCheckBox(int id, bool isCheck, String text, int idOrder) async{
+  void updateCheckBox(int id, bool isCheck, String text) async{
     try{
       await _initConnection();
-      await _connection.query("UPDATE checkbox SET is_checked = $isCheck, text = '$text', elem_order = $idOrder WHERE id = $id;");
+      await _connection.query("SELECT update_checkbox($id::bigint, $isCheck::boolean, '$text'::text;");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
 
-  void updateImage(int id, List<int> data, int idOrder) async{
+  void updateImage(int id, List<int> data) async{
     try{
       await _initConnection();
-      await _connection.query('UPDATE image SET data = $data, elem_order = $idOrder WHERE id = $id;');
+      await _connection.query('UPDATE image SET data = $data WHERE id = $id;');
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateImage: Connection lost\n$e'); }
   }
 
-  void updateTexts(int id, String text, int type, int idOrder) async {
+  void updateTexts(int id, String text, int type) async {
     try {
       await _initConnection();
-      await _connection.query("UPDATE text SET text = '$text', type = $type, elem_order = $idOrder WHERE id = $id;");
+      await _connection.query("UPDATE text SET text = '$text', type = $type WHERE id = $id;");
       await _connection.close();
-    } catch (e) { throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
+    } catch(e){ throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
 
   Future<void> updateSheetOrder(List<Sheet> sheets) async{
@@ -282,7 +281,7 @@ class Database{
         }
       }
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)updateSheetOrder:\n$e'); }
+    } catch(e){ throw DatabaseException('(Database)updateSheetOrder:\n$e'); }
   }
 
   Future<void> updateElementOrder(List<Element> elements) async{
@@ -295,7 +294,7 @@ class Database{
       await _initConnection();
       await updateDatabaseElementOrder(ids, orders);
       await _connection.close();
-    } catch(e) { throw DatabaseException('(Database)updateElementOrder:\n$e'); }
+    } catch(e){ throw DatabaseException('(Database)updateElementOrder:\n$e'); }
   }
 
   Future<void> updateDatabaseElementOrder(List<int> ids, List<int> orders) async{

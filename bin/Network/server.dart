@@ -280,19 +280,19 @@ class Server{
           break;
         case 'Sheet':
           var sheet = Sheet.fromJson(json);
-          database.updateSheet(sheet.id, sheet.title, sheet.subtitle, sheet.idOrder);
+          database.updateSheet(sheet.id, sheet.title, sheet.subtitle);
           break;
         case 'Checkbox':
           var elem = Element.fromJson(json);
-          database.updateCheckBox((elem as Checkbox).id, elem.isChecked, elem.text, elem.idOrder);
+          database.updateCheckBox((elem as Checkbox).id, elem.isChecked, elem.text);
           break;
         case 'Image':
           var elem = Element.fromJson(json);
-          database.updateImage((elem as Image).id, elem.data, elem.idOrder);
+          database.updateImage((elem as Image).id, elem.data);
           break;
         case 'Text':
           var elem = Element.fromJson(json);
-          database.updateTexts((elem as Text).id, elem.text, elem.txtType.index, elem.idOrder);
+          database.updateTexts((elem as Text).id, elem.text, elem.txtType.index);
           break;
         default:
           throw Exception('Wrong object type');
