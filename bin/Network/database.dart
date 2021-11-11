@@ -172,7 +172,7 @@ class Database{
   Future<void> addSheet(int idCell, String title, String subtitle, int idOrder) async{
     try{
       await _initConnection();
-      await _connection.query("SELECT add_sheet($idCell::bigint, '$title'::text, '$subtitle'::text);");
+      await _connection.query("CALL add_sheet($idCell::bigint, '$title'::text, '$subtitle'::text);");
       await _connection.close();
     }
     on PostgreSQLException catch(e) { throw DatabaseException('(Database)addSheet: Wrong entries\n$e'); }
@@ -256,18 +256,10 @@ class Database{
     } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
 
-  void updateImage(int id, List<int> data) async{
-    try{
-      await _initConnection();
-      await _connection.query('UPDATE image SET data = $data WHERE id = $id;');
-      await _connection.close();
-    } catch(e){ throw DatabaseException('(Database)updateImage: Connection lost\n$e'); }
-  }
-
   void updateTexts(int id, String text, int type) async {
     try {
       await _initConnection();
-      await _connection.query("UPDATE text SET text = '$text', type = $type WHERE id = $id;");
+      await _connection.query("CALL update_text($id::bigint, '$text'::text);");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateTexts: Connection lost\n$e'); }
   }
@@ -277,7 +269,7 @@ class Database{
       await _initConnection();
       for(var i = 0; i < sheets.length; i++){
         if(sheets[i].idOrder != i){
-          await _connection.query('UPDATE sheet SET idorder = ${sheets[i].idOrder} WHERE id = ${sheets[i].id}');
+          await _connection.query('CALL update_sheet_order(${sheets[i].id}::bigint, ${sheets[i].idOrder}::int);');
         }
       }
       await _connection.close();
@@ -300,7 +292,7 @@ class Database{
   Future<void> updateDatabaseElementOrder(List<int> ids, List<int> orders) async{
     for(var i = 0; i < ids.length; i++){
       if(orders[i] != i){
-        await _connection.query('UPDATE element SET elem_order = $i WHERE id = ${ids[i]};');
+        await _connection.query('CALL update_element_order(${ids[i]}::bigint, $i::int;');
       }
     }
   }

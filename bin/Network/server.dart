@@ -286,10 +286,6 @@ class Server{
           var elem = Element.fromJson(json);
           database.updateCheckBox((elem as Checkbox).id, elem.isChecked, elem.text);
           break;
-        case 'Image':
-          var elem = Element.fromJson(json);
-          database.updateImage((elem as Image).id, elem.data);
-          break;
         case 'Text':
           var elem = Element.fromJson(json);
           database.updateTexts((elem as Text).id, elem.text, elem.txtType.index);
