@@ -24,11 +24,15 @@ class Server{
   Server(this._ipServer, this._portServer, this._ipDatabase, this._portDatabase);
 
   void start() async{
-    var server = await ServerSocket.bind(_ipServer, _portServer);
     try{
+      var server = await ServerSocket.bind(_ipServer, _portServer);
       print('/* Waiting for connections */');
       server.listen(_handleClient);
-    } catch(e){ await server.close(); }
+    }
+    catch(e){
+      sleep(Duration(seconds: 5));
+      start();
+    }
   }
 
   void _handleClient(Socket _socket) async{
