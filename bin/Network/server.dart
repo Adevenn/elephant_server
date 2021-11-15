@@ -30,7 +30,7 @@ class Server{
       server.listen(_handleClient);
     }
     catch(e){
-      sleep(Duration(seconds: 5));
+      sleep(Duration(seconds: 2));
       start();
     }
   }
