@@ -118,7 +118,7 @@ class Database{
       PostgreSQLResult checkboxes, images, texts;
       await _initConnection();
       checkboxes = await _connection.query('SELECT id, text, is_checked, elem_order FROM checkbox WHERE id_sheet = $idSheet ORDER BY elem_order;');
-      images = await _connection.query('SELECT id, data, elem_order FROM image WHERE id_sheet = $idSheet ORDER BY elem_order;');
+      images = await _connection.query('SELECT id, image_preview, elem_order FROM image WHERE id_sheet = $idSheet ORDER BY elem_order;');
       texts = await _connection.query('SELECT id, text, type, elem_order FROM text WHERE id_sheet = $idSheet ORDER BY elem_order;');
       await _connection.close();
 
@@ -128,7 +128,7 @@ class Database{
       }
       for(final elem in images) {
         var data = jsonDecode(elem[1]);
-        elems.add(Image(id: elem[0] as int, idParent: idSheet,data: Uint8List.fromList(data['data'].cast<int>()), idOrder: elem[2] as int));
+        elems.add(Image(id: elem[0] as int, idParent: idSheet, imgPreview: Uint8List.fromList(data['img_preview'].cast<int>()), idOrder: elem[2] as int));
       }
       for(final elem in texts) {
         elems.add(Text(id: elem[0] as int, idParent: idSheet,text: elem[1] as String, txtType: TextType.values[elem[2] as int], idOrder: elem[3] as int));
@@ -187,11 +187,12 @@ class Database{
     } catch(e) { throw DatabaseException('(Database)addCheckbox: Connection lost\n$e'); }
   }
 
-  Future<void> addImage(Uint8List data, int idSheet) async{
+  Future<void> addImage(Uint8List imgPreview, Uint8List? imgRaw, int idSheet) async{
     try{
-      var json = jsonEncode({'data' : data});
+      var jsonImgPreview = jsonEncode({'img_preview' : imgPreview});
+      var jsonImgRaw = jsonEncode({'img_raw' : imgRaw});
       await _initConnection();
-      await _connection.query("CALL add_image($idSheet::bigint, '$json'::text);");
+      await _connection.query("CALL add_image($idSheet::bigint, '$jsonImgPreview'::text, '$jsonImgRaw'::text);");
       await _connection.close();
     } catch(e) { throw DatabaseException('(Database)addImage: Connection lost\n$e'); }
   }

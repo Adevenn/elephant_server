@@ -182,7 +182,6 @@ class Server{
       var type = await socket.readSym();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readBigString());
-      //TODO: Optimisation => send only necessary infos (need tests)
       switch(type){
         case 'Sheet':
           var sheet = Sheet.fromJson(json);
@@ -194,7 +193,7 @@ class Server{
           break;
         case 'Image':
           var element = Element.fromJson(json);
-          await database.addImage((element as Image).data, element.idParent);
+          await database.addImage((element as Image).imgPreview, element.imgRaw, element.idParent);
           break;
         case 'Text':
           var element = Element.fromJson(json);
