@@ -17,7 +17,7 @@ abstract class Element{
       case 'Checkbox':
         return Checkbox(id: json['id'], idParent: json['id_parent'], isChecked: json['is_checked'], text: json['text'], idOrder: json['id_order']);
       case 'Image':
-        return Image(id: json['id'], idParent: json['id_parent'], imgPreview: Uint8List.fromList(json['img_preview'].cast<int>()), idOrder: json['id_order']);
+        return Image.full(id: json['id'], idParent: json['id_parent'], imgPreview: Uint8List.fromList(json['img_preview'].cast<int>()), imgRaw: Uint8List.fromList(json['img_raw'].cast<int>()), idOrder: json['id_order']);
       case 'Text':
         return Text(id: json['id'], idParent: json['id_parent'], text: json['text'], txtType: TextType.values[json['txt_type']], idOrder: json['id_order']);
       default:

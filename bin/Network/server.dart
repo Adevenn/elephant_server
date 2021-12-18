@@ -53,6 +53,9 @@ class Server{
         case 'elements':
           await _elements(socket);
           break;
+        case 'rawImage':
+          await _rawImage(socket);
+          break;
         case 'addCell':
           await _addCell(socket);
           break;
@@ -142,6 +145,14 @@ class Server{
     on DatabaseException catch(e) { print('(Server)_elements:\n$e'); }
     on DatabaseTimeoutException catch(e) { print('(Server)_elements:\n$e'); }
     catch(e){ print('(Server)_elements:\n$e'); }
+  }
+
+  Future<void> _rawImage(SocketCustom socket) async{
+    var database = await socket.setup();
+    var id = int.parse(await socket.readSym());
+    var data =await database.selectRawImage(id);
+    await socket.writeBigString(data);
+    //TODO: TRY CATCH
   }
 
   ///Receive a json containing a Cell

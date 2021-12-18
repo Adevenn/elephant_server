@@ -143,6 +143,18 @@ class Database{
     catch(e) { throw Exception(e); }
   }
 
+  Future<String> selectRawImage(int idImg) async{
+    try{
+      await _initConnection();
+      var rawImgResult = await _connection.query('SELECT image_raw FROM image WHERE id = $idImg;');
+      for(final rawImg in rawImgResult){
+        return rawImg[0] as String;
+      }
+      throw Exception('No rawImage found with id : $idImg');
+    }
+    catch(e){ throw Exception(e); }
+  }
+
   /// ADD ///
 
   Future<void> addCell(String title, String subtitle, String type) async{
