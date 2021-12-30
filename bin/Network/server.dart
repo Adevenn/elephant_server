@@ -148,11 +148,17 @@ class Server{
   }
 
   Future<void> _rawImage(SocketCustom socket) async{
-    var database = await socket.setup();
-    var id = int.parse(await socket.readSym());
-    var data =await database.selectRawImage(id);
-    await socket.writeBigString(data);
-    //TODO: TRY CATCH
+    try{
+      var database = await socket.setup();
+      var id = int.parse(await socket.readSym());
+      var data =await database.selectRawImage(id);
+      await socket.writeBigString(data);
+    }
+    on SocketException{ print('(Server)_rawImage:\nSocketException'); }
+    on EncryptionException{ print('(Server)_rawImage:\nEncryption Exception'); }
+    on DatabaseException catch(e) { print('(Server)_rawImage:\n$e'); }
+    on DatabaseTimeoutException catch(e) { print('(Server)_rawImage:\n$e'); }
+    catch(e){ print('(Server)_rawImage:\n$e'); }
   }
 
   ///Receive a json containing a Cell
