@@ -304,7 +304,7 @@ class Server{
           break;
         case 'Checkbox':
           var elem = Element.fromJson(json);
-          database.updateCheckBox((elem as Checkbox).id, elem.isChecked, elem.text);
+          database.updateCheckbox((elem as Checkbox).id, elem.isChecked, elem.text);
           break;
         case 'Text':
           var elem = Element.fromJson(json);

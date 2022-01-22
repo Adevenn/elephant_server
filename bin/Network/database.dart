@@ -261,10 +261,10 @@ class Database{
     } catch(e){ throw DatabaseException('(Database)updateSheet: Connection lost\n$e'); }
   }
 
-  void updateCheckBox(int id, bool isCheck, String text) async{
+  void updateCheckbox(int id, bool isCheck, String text) async{
     try{
       await _initConnection();
-      await _connection.query("CALL update_checkbox($id::bigint, $isCheck::boolean, '$text'::text;");
+      await _connection.query("CALL update_checkbox($id::bigint, $isCheck::boolean, '$text'::text);");
       await _connection.close();
     } catch(e){ throw DatabaseException('(Database)updateCheckbox: Connection lost\n$e'); }
   }
