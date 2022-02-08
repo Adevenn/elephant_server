@@ -409,8 +409,8 @@ class Database {
       List<int> ids, List<int> orders) async {
     for (var i = 0; i < ids.length; i++) {
       if (orders[i] != i) {
-        await _connection
-            .query('CALL update_element_order(${ids[i]}::bigint, $i::int;');
+        await _connection.query('CALL update_element_order(${ids[i]}::bigint,'
+            ' $i::int);');
       }
     }
   }
