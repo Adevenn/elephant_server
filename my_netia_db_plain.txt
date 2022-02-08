@@ -1,0 +1,625 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 13.5 (Raspbian 13.5-0+deb11u1)
+-- Dumped by pg_dump version 13.3
+
+-- Started on 2022-02-08 13:41:07
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 210 (class 1255 OID 24577)
+-- Name: add_cell(text, text, integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.add_cell(title text, subtitle text, cell_type integer)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	id_cell bigint;
+BEGIN	
+	INSERT INTO cell
+	(title, subtitle, type)
+	VALUES ($1, $2, $3);
+	
+	SELECT cell.id INTO id_cell
+	FROM cell
+	WHERE cell.title = $1;
+	
+	INSERT INTO sheet
+	(idcell, title, subtitle, idorder)
+	VALUES (id_cell, 'New Sheet', '', 0);
+END;
+$_$;
+
+
+--
+-- TOC entry 211 (class 1255 OID 24578)
+-- Name: add_checkbox(bigint); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.add_checkbox(id_sheet bigint)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	count_order integer;
+BEGIN
+	
+	SELECT COUNT(*) INTO count_order
+	FROM element
+	WHERE element.id_sheet = $1;
+	
+	INSERT INTO checkbox
+	(text, is_checked, id_sheet, elem_order)
+	VALUES ('', false, $1, count_order);
+END;
+$_$;
+
+
+--
+-- TOC entry 212 (class 1255 OID 24580)
+-- Name: add_image(bigint, text, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.add_image(id_sheet bigint, image_preview text, image_raw text)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	count_order integer;
+BEGIN
+	
+	SELECT COUNT(*) INTO count_order
+	FROM element
+	WHERE element.id_sheet = $1;
+	
+	INSERT INTO image
+	(image_preview, image_raw, id_sheet, elem_order)
+	VALUES ($2, $3, $1, count_order);
+END;
+$_$;
+
+
+--
+-- TOC entry 214 (class 1255 OID 24581)
+-- Name: add_sheet(bigint, text, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.add_sheet(id_cell bigint, title text, subtitle text)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	id_order integer;
+BEGIN
+	SELECT COUNT(*) INTO id_order
+	FROM sheet
+	WHERE idcell = id_cell;
+	
+	INSERT INTO sheet
+	(idcell, title, subtitle, idorder)
+	VALUES ($1, $2, $3, id_order);
+END;
+$_$;
+
+
+--
+-- TOC entry 215 (class 1255 OID 24582)
+-- Name: add_text(bigint, integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.add_text(id_sheet bigint, text_type integer)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	count_order integer;
+BEGIN
+	SELECT COUNT(*) INTO count_order
+	FROM element
+	WHERE element.id_sheet = $1;
+	
+	INSERT INTO text
+	(text, type, id_sheet, elem_order)
+	VALUES ('', $2, $1, count_order);
+END;
+$_$;
+
+
+--
+-- TOC entry 216 (class 1255 OID 24583)
+-- Name: delete_cell(bigint); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.delete_cell(id_cell bigint)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN	
+	DELETE FROM cell
+	WHERE id = $1;
+END;
+$_$;
+
+
+--
+-- TOC entry 217 (class 1255 OID 24584)
+-- Name: delete_element(bigint); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.delete_element(id_element bigint)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	sheet_id bigint;
+	index_for int := 0;
+	r element%rowtype;
+	is_sort boolean := false;
+BEGIN
+	SELECT element.id_sheet INTO sheet_id
+	FROM element
+	WHERE element.id = $1;
+	
+	DELETE FROM element
+	WHERE element.id = $1;
+	
+	WHILE is_sort = false LOOP
+		is_sort := true;
+		FOR r IN SELECT * FROM element WHERE element.id_sheet = sheet_id ORDER BY element.elem_order
+		LOOP
+			IF r.elem_order != index_for THEN
+				UPDATE element SET elem_order = index_for WHERE id = r.id;
+				is_sort := false;
+				EXIT;
+			END IF;
+			index_for := index_for + 1;
+		END LOOP;
+		index_for := 0;
+	END LOOP;
+END;
+$_$;
+
+
+--
+-- TOC entry 218 (class 1255 OID 24585)
+-- Name: delete_sheet(bigint); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.delete_sheet(id_sheet bigint)
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	cell_id bigint;
+	index_for int := 0;
+	r sheet%rowtype;
+	is_sort boolean := false;
+BEGIN
+	SELECT sheet.idcell INTO cell_id
+	FROM sheet
+	WHERE sheet.id = $1;
+	
+	DELETE FROM sheet
+	WHERE sheet.id = $1;
+	
+	WHILE is_sort = false LOOP
+		is_sort := true;
+		FOR r IN SELECT * FROM sheet WHERE sheet.idcell = cell_id ORDER BY sheet.idorder
+		LOOP
+			IF r.idorder != index_for THEN
+				UPDATE sheet SET idorder = index_for WHERE id = r.id;
+				is_sort := false;
+				EXIT;
+			END IF;
+			index_for := index_for + 1;
+		END LOOP;
+		index_for := 0;
+	END LOOP;
+END;
+$_$;
+
+
+--
+-- TOC entry 219 (class 1255 OID 24586)
+-- Name: getsheets(bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.getsheets(id_cell bigint) RETURNS TABLE(id bigint, idcell bigint, title text, subtitle text, idorder integer)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	RETURN QUERY
+	select * from sheet
+	where sheet.idcell = $1;
+end;
+$_$;
+
+
+--
+-- TOC entry 220 (class 1255 OID 24587)
+-- Name: update_cell(bigint, text, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.update_cell(id_cell bigint, title text, subtitle text)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	UPDATE cell
+	SET	title = $2,
+		subtitle = $3
+	WHERE id = $1;
+END;
+$_$;
+
+
+--
+-- TOC entry 213 (class 1255 OID 24588)
+-- Name: update_checkbox(bigint, boolean, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.update_checkbox(id_checkbox bigint, is_checked boolean, text text)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	UPDATE checkbox
+	SET	is_checked = $2,
+		text = $3
+	WHERE id = $1;
+END;
+$_$;
+
+
+--
+-- TOC entry 222 (class 1255 OID 24589)
+-- Name: update_element_order(bigint, integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.update_element_order(id_sheet bigint, element_order integer)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	UPDATE element
+	SET	elem_order = $2
+	WHERE id = $1;
+END;
+$_$;
+
+
+--
+-- TOC entry 221 (class 1255 OID 24590)
+-- Name: update_sheet(bigint, text, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.update_sheet(id_sheet bigint, title text, subtitle text)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	UPDATE sheet
+	SET	title = $2,
+		subtitle = $3
+	WHERE id = $1;
+END;
+$_$;
+
+
+--
+-- TOC entry 229 (class 1255 OID 24591)
+-- Name: update_sheet_order(bigint, integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.update_sheet_order(id_sheet bigint, sheet_order integer)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	UPDATE sheet
+	SET	idorder = $2
+	WHERE id = $1;
+END;
+$_$;
+
+
+--
+-- TOC entry 235 (class 1255 OID 24592)
+-- Name: update_text(bigint, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.update_text(id_elem bigint, text text)
+    LANGUAGE plpgsql
+    AS $_$
+BEGIN
+	UPDATE text
+	SET	text = $2
+	WHERE id = $1;
+END;
+$_$;
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 200 (class 1259 OID 24593)
+-- Name: cell; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.cell (
+    id bigint NOT NULL,
+    title text NOT NULL,
+    subtitle text NOT NULL,
+    type integer NOT NULL
+);
+
+
+--
+-- TOC entry 201 (class 1259 OID 24599)
+-- Name: cell_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.cell_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3051 (class 0 OID 0)
+-- Dependencies: 201
+-- Name: cell_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.cell_id_seq OWNED BY public.cell.id;
+
+
+--
+-- TOC entry 202 (class 1259 OID 24601)
+-- Name: element; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.element (
+    id bigint NOT NULL,
+    elem_order integer NOT NULL,
+    id_sheet bigint NOT NULL
+);
+
+
+--
+-- TOC entry 203 (class 1259 OID 24604)
+-- Name: checkbox; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.checkbox (
+    text text NOT NULL,
+    is_checked boolean NOT NULL
+)
+INHERITS (public.element);
+
+
+--
+-- TOC entry 204 (class 1259 OID 24610)
+-- Name: element_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.element_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3052 (class 0 OID 0)
+-- Dependencies: 204
+-- Name: element_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.element_id_seq OWNED BY public.element.id;
+
+
+--
+-- TOC entry 205 (class 1259 OID 24612)
+-- Name: image; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.image (
+    image_preview text NOT NULL,
+    image_raw text NOT NULL
+)
+INHERITS (public.element);
+
+
+--
+-- TOC entry 206 (class 1259 OID 24618)
+-- Name: sheet; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sheet (
+    id bigint NOT NULL,
+    idcell bigint NOT NULL,
+    title text NOT NULL,
+    subtitle text NOT NULL,
+    idorder integer
+);
+
+
+--
+-- TOC entry 207 (class 1259 OID 24624)
+-- Name: sheet_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sheet_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3053 (class 0 OID 0)
+-- Dependencies: 207
+-- Name: sheet_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sheet_id_seq OWNED BY public.sheet.id;
+
+
+--
+-- TOC entry 208 (class 1259 OID 24626)
+-- Name: sheet_idbook_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sheet_idbook_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3054 (class 0 OID 0)
+-- Dependencies: 208
+-- Name: sheet_idbook_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sheet_idbook_seq OWNED BY public.sheet.idcell;
+
+
+--
+-- TOC entry 209 (class 1259 OID 24628)
+-- Name: text; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.text (
+    type integer NOT NULL,
+    text text NOT NULL
+)
+INHERITS (public.element);
+
+
+--
+-- TOC entry 2899 (class 2604 OID 24634)
+-- Name: cell id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cell ALTER COLUMN id SET DEFAULT nextval('public.cell_id_seq'::regclass);
+
+
+--
+-- TOC entry 2901 (class 2604 OID 24635)
+-- Name: checkbox id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checkbox ALTER COLUMN id SET DEFAULT nextval('public.element_id_seq'::regclass);
+
+
+--
+-- TOC entry 2900 (class 2604 OID 24636)
+-- Name: element id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.element ALTER COLUMN id SET DEFAULT nextval('public.element_id_seq'::regclass);
+
+
+--
+-- TOC entry 2902 (class 2604 OID 24637)
+-- Name: image id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.image ALTER COLUMN id SET DEFAULT nextval('public.element_id_seq'::regclass);
+
+
+--
+-- TOC entry 2903 (class 2604 OID 24638)
+-- Name: sheet id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sheet ALTER COLUMN id SET DEFAULT nextval('public.sheet_id_seq'::regclass);
+
+
+--
+-- TOC entry 2904 (class 2604 OID 24639)
+-- Name: sheet idcell; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sheet ALTER COLUMN idcell SET DEFAULT nextval('public.sheet_idbook_seq'::regclass);
+
+
+--
+-- TOC entry 2905 (class 2604 OID 24640)
+-- Name: text id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.text ALTER COLUMN id SET DEFAULT nextval('public.element_id_seq'::regclass);
+
+
+--
+-- TOC entry 2907 (class 2606 OID 24642)
+-- Name: cell cell_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cell
+    ADD CONSTRAINT cell_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2911 (class 2606 OID 24644)
+-- Name: element element_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.element
+    ADD CONSTRAINT element_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2913 (class 2606 OID 24646)
+-- Name: sheet sheet_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sheet
+    ADD CONSTRAINT sheet_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2909 (class 2606 OID 24648)
+-- Name: cell uniqueTitle; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cell
+    ADD CONSTRAINT "uniqueTitle" UNIQUE (title) INCLUDE (title);
+
+
+--
+-- TOC entry 2914 (class 2606 OID 24649)
+-- Name: element element_id_sheet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.element
+    ADD CONSTRAINT element_id_sheet_fkey FOREIGN KEY (id_sheet) REFERENCES public.sheet(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 2915 (class 2606 OID 24654)
+-- Name: sheet fkey_cell; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sheet
+    ADD CONSTRAINT fkey_cell FOREIGN KEY (idcell) REFERENCES public.cell(id) ON DELETE CASCADE NOT VALID;
+
+
+-- Completed on 2022-02-08 13:41:07
+
+--
+-- PostgreSQL database dump complete
+--
+
