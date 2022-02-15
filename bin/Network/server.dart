@@ -286,7 +286,7 @@ class Server {
   Future<void> _deleteItem(SocketCustom socket) async {
     try {
       var database = await socket.setup();
-      var type = await socket.readSym();
+      var type = await socket.readBigString();
       await socket.synchronizeWrite();
       var idItem = int.parse(await socket.readSym());
       switch (type) {
@@ -302,21 +302,21 @@ class Server {
         default:
           throw Exception('Wrong object type');
       }
-      await socket.writeSym('success');
+      await socket.writeBigString('success');
       print('success');
     } on EncryptionException {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_deleteItem:\nEncryption Exception');
     } on DatabaseException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_deleteItem:\n$e');
     } on DatabaseTimeoutException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_deleteItem:\n$e');
     } on SocketException catch (e) {
       print('(Server)_deleteItem: Connection lost with ${e.address}');
     } catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_deleteItem:\n$e');
     }
   }
@@ -327,7 +327,7 @@ class Server {
   Future<void> _updateItem(SocketCustom socket) async {
     try {
       var database = await socket.setup();
-      var type = await socket.readSym();
+      var type = await socket.readBigString();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readBigString());
       switch (type) {
@@ -352,21 +352,21 @@ class Server {
         default:
           throw Exception('Wrong object type');
       }
-      await socket.writeSym('success');
+      await socket.writeBigString('success');
       print('success');
     } on EncryptionException {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateItem:\nEncryption Exception');
     } on DatabaseException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateItem:\n$e');
     } on DatabaseTimeoutException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateItem:\n$e');
     } on SocketException catch (e) {
       print('(Server)_updateItem: Connection lost with ${e.address}');
     } catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateItem:\n$e');
     }
   }
@@ -374,7 +374,7 @@ class Server {
   Future<void> _updateOrder(SocketCustom socket) async {
     try {
       var database = await socket.setup();
-      var type = await socket.readSym();
+      var type = await socket.readBigString();
       await socket.synchronizeWrite();
       var jsonList = jsonDecode(await socket.readBigString());
 
@@ -387,21 +387,21 @@ class Server {
       } else {
         throw Exception('Wrong object type');
       }
-      await socket.writeSym('success');
+      await socket.writeBigString('success');
       print('success');
     } on EncryptionException {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateOrder:\nEncryption Exception');
     } on DatabaseException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateOrder:\n$e');
     } on DatabaseTimeoutException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateOrder:\n$e');
     } on SocketException catch (e) {
       print('(Server)_updateObject: Connection lost with ${e.address}');
     } catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_updateOrder:\n$e');
     }
   }
