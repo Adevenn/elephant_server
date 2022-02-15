@@ -212,21 +212,21 @@ class Server {
       var jsonObj = jsonDecode(await socket.readSym());
       var cell = Cell.fromJson(jsonObj);
       await database.addCell(cell.title, cell.subtitle, cell.type);
-      await socket.writeSym('success');
+      await socket.writeBigString('success');
       print('success');
     } on EncryptionException {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addCell\nEncryption Exception');
     } on DatabaseException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addCell:\n$e');
     } on DatabaseTimeoutException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addCell:\n$e');
     } on SocketException catch (e) {
       print('(Server)_addCell: Connection lost with ${e.address}');
     } catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addCell:\n$e');
     }
   }
@@ -236,7 +236,7 @@ class Server {
   Future<void> _addItem(SocketCustom socket) async {
     try {
       var database = await socket.setup();
-      var type = await socket.readSym();
+      var type = await socket.readBigString();
       await socket.synchronizeWrite();
       var json = jsonDecode(await socket.readBigString());
       switch (type) {
@@ -262,21 +262,21 @@ class Server {
         default:
           throw Exception('(Server)_addItem: Wrong type -> $type');
       }
-      await socket.writeSym('success');
+      await socket.writeBigString('success');
       print('success');
     } on EncryptionException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addItem:\nEncryption Exception\n$e');
     } on DatabaseException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addItem:\n$e');
     } on DatabaseTimeoutException catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addItem:\n$e');
     } on SocketException catch (e) {
       print('(Server)_addItem: Connection lost with ${e.address}');
     } catch (e) {
-      await socket.writeSym('failed');
+      await socket.writeBigString('failed');
       print('(Server)_addItem:\n$e');
     }
   }
