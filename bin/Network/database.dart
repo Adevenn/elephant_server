@@ -184,6 +184,7 @@ class Database {
             id: elem[0] as int,
             idParent: idSheet,
             imgPreview: Uint8List.fromList(data['img_preview'].cast<int>()),
+            imgRaw: Uint8List(0),
             idOrder: elem[2] as int));
       }
       for (final elem in texts) {
