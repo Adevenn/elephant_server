@@ -7,7 +7,7 @@ void main(List<String> args) {
   ipServer portServer ipDatabase portDatabase
   ip format: 127.0.0.1
   port format: a number between 0-65535''';
-  if(args.length != 4 || !isArgsValid(args)){
+  if (args.length != 4 || !isArgsValid(args)) {
     print(patternArgs);
     exit(0);
   }
@@ -15,17 +15,23 @@ void main(List<String> args) {
   server.start();
 }
 
-bool isArgsValid(List<String> args){
-  var ipv4Reg = RegExp(r'^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$', caseSensitive: false, multiLine: false);
-  return ipv4Reg.hasMatch(args[0]) && isNumeric(args[1]) && ipv4Reg.hasMatch(args[2]) && isNumeric(args[3]);
+bool isArgsValid(List<String> args) {
+  var ipv4Reg = RegExp(r'^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$',
+      caseSensitive: false, multiLine: false);
+  return ipv4Reg.hasMatch(args[0]) &&
+      isNumeric(args[1]) &&
+      ipv4Reg.hasMatch(args[2]) &&
+      isNumeric(args[3]);
 }
 
-bool isNumeric(String text){
-  try{
+bool isNumeric(String text) {
+  try {
     var port = int.parse(text);
-    if(port > 0 && port < 65535){
+    if (port > 0 && port < 65535) {
       return true;
     }
     return false;
-  } catch(e){ return false; }
+  } catch (e) {
+    return false;
+  }
 }
