@@ -2,7 +2,6 @@ import 'package:postgres/postgres.dart';
 
 import '../Exception/database_exception.dart';
 
-
 class DB {
   final String _ip;
   final int _port;
