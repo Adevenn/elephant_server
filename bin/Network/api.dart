@@ -24,28 +24,7 @@ class API {
     db = DB(ip, port);
   }
 
-  List<Element> sortElems(List<Element> elements) {
-    for (var i = 1; i < elements.length; i++) {
-      if (elements[i].idOrder < elements[i - 1].idOrder) {
-        var elem = elements[i];
-        elements[i] = elements[i - 1];
-        elements[i - 1] = elem;
-        i = 0;
-      }
-    }
-    return elements;
-  }
-
-  Future<void> test(String database, username, password) async {
-    try {
-      await db.test(database, username, password);
-    } on DatabaseException catch (e) {
-      throw DatabaseException('$_className.test:\n$e');
-    }
-  }
-
-  /// SELECT ///
-
+  ///DB values -> List<Cell>
   List<Cell> _resultToCells(List<dynamic> result) {
     try {
       var cells = <Cell>[];
@@ -133,6 +112,28 @@ class API {
     }
     return elems;
   }
+
+  List<Element> sortElems(List<Element> elements) {
+    for (var i = 1; i < elements.length; i++) {
+      if (elements[i].idOrder < elements[i - 1].idOrder) {
+        var elem = elements[i];
+        elements[i] = elements[i - 1];
+        elements[i - 1] = elem;
+        i = 0;
+      }
+    }
+    return elements;
+  }
+
+  Future<void> test(String database, username, password) async {
+    try {
+      await db.test(database, username, password);
+    } on DatabaseException catch (e) {
+      throw DatabaseException('$_className.test:\n$e');
+    }
+  }
+
+  /// SELECT ///
 
   Future<List<Cell>> selectCells(
       String database, username, password, Map json) async {

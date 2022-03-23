@@ -30,7 +30,7 @@ class Server {
           print('content : $json');
           switch (request.requestedUri.path) {
             case '/init':
-              init(request, json);
+              await init(request, json);
               break;
             case '/cells':
               await cells(request, json);
@@ -124,9 +124,9 @@ class Server {
   }
 
   ///Test db connection
-  void init(HttpRequest request, Map json) {
+  Future<void> init(HttpRequest request, Map json) async {
     try {
-      _api.test(json['database'], json['username'], json['password']);
+      await _api.test(json['database'], json['username'], json['password']);
       request.response
         ..statusCode = HttpStatus.ok
         ..write('test ok');
@@ -142,7 +142,6 @@ class Server {
     try {
       var cells = await _api.selectCells(json['database'], json['username'],
           json['password'], jsonDecode(json['json']));
-      print(cells);
       request.response
         ..statusCode = HttpStatus.ok
         ..write(jsonEncode(cells));
