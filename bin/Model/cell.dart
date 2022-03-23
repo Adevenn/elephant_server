@@ -1,15 +1,12 @@
-import '../Model/CellComponents/ranking.dart';
-import '../Model/CellComponents/to_do_list.dart';
+import '../Model/Cells/ranking.dart';
+import '../Model/Cells/to_do_list.dart';
 
-import 'CellComponents/book.dart';
-import 'Elements/element.dart';
-import 'sheet.dart';
+import 'Cells/Book/book.dart';
 
 abstract class Cell{
   final int id;
   String title;
   String subtitle;
-  List<Sheet> sheets = [];
   final String type;
 
 
@@ -42,13 +39,9 @@ abstract class Cell{
   }
 
   Map<String, dynamic> toJson() => {
-    'id' : id,
+    'id_cell' : id,
     'title' : title,
     'subtitle' : subtitle,
     'type' : type,
   };
-
-  void addSheets(List<Sheet> list) => sheets = list;
-  void addElements(List<Element> list);
-  void sortElements();
 }

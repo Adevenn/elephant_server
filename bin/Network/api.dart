@@ -3,17 +3,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import '../Exception/database_exception.dart';
-import '../Exception/server_exception.dart';
 import '../Model/cell.dart';
-import '../Model/CellComponents/book.dart';
-import '../Model/CellComponents/ranking.dart';
-import '../Model/CellComponents/to_do_list.dart';
-import '../Model/Elements/checkbox.dart';
 import '../Model/Elements/element.dart';
 import '../Model/Elements/image.dart';
 import '../Model/Elements/text_type.dart';
 import '../Model/Elements/text.dart';
-import '../Model/sheet.dart';
+import '../Model/Cells/Book/sheet.dart';
 import 'database.dart';
 
 class API {
@@ -26,105 +21,73 @@ class API {
 
   ///DB values -> List<Cell>
   List<Cell> _resultToCells(List<dynamic> result) {
-    try {
+    //try {
       var cells = <Cell>[];
       for (final row in result) {
-        var id = row['cell']['id'] as int;
-        var title = row['cell']['title'] as String;
-        var subtitle = row['cell']['subtitle'] as String;
-        switch (row['cell']['type'] as int) {
-          case 0:
-            cells.add(Book(id, title, subtitle));
-            break;
-          case 1:
-            cells.add(ToDoList(id: id, title: title, subtitle: subtitle));
-            break;
-          case 2:
-            cells.add(Ranking(id: id, title: title, subtitle: subtitle));
-            break;
-          default:
-            throw DatabaseException('Not an existing type of cell');
-        }
+        cells.add(Cell.fromJson(row['cell']));
       }
       return cells;
+    /*} catch (e) {
+      throw DatabaseException('$e');
+    }*/
+  }
+
+  ///DB values -> List<Sheet>
+  List<Sheet> _resultToSheets(List<dynamic> result) {
+    try {
+      var sheets = <Sheet>[];
+      for (final row in result) {
+        sheets.add(Sheet(
+            row['sheet']['id'] as int,
+            row['sheet']['id_cell'] as int,
+            row['sheet']['title'] as String,
+            row['sheet']['subtitle'] as String,
+            row['sheet']['id_order'] as int));
+      }
+      return sheets;
     } catch (e) {
       throw DatabaseException('$e');
     }
   }
 
-  List<Sheet> _resultToSheets(List<dynamic> result) {
-    var sheets = [];
-    var sheetsRaw = [];
-    var idCell = 0;
-    for (var i = 0; i < sheetsRaw.length; i++) {
-      var sheet = Sheet(
-          sheetsRaw[i][0] as int,
-          idCell,
-          sheetsRaw[i][1] as String,
-          sheetsRaw[i][2] as String,
-          sheetsRaw[i][3] as int);
-      sheets.add(sheet);
-    }
-    //return sheets;
-    return [];
-  }
-
-  List<Element> _resultToElems(List<dynamic> cb, img, txt, int idSheet) {
+  List<Element> _resultToElems(List<dynamic> result, int idSheet) {
     var elems = <Element>[];
+    print(result);
     //Extract data from db values and create objects
-    for (final elem in cb) {
-      elems.add(Checkbox(
-          id: elem[0] as int,
-          idParent: idSheet,
-          text: elem[1] as String,
-          isChecked: elem[2] as bool,
-          idOrder: elem[3] as int));
-    }
-    for (final elem in img) {
-      var data = jsonDecode(elem[1]);
-      elems.add(Image(
-          id: elem[0] as int,
-          idParent: idSheet,
-          imgPreview: Uint8List.fromList(data['img_preview'].cast<int>()),
-          imgRaw: Uint8List(0),
-          idOrder: elem[2] as int));
-    }
-    for (final elem in txt) {
-      elems.add(Text(
-          id: elem[0] as int,
-          idParent: idSheet,
-          text: elem[1] as String,
-          txtType: TextType.values[elem[2] as int],
-          idOrder: elem[3] as int));
+    for (final row in result) {
+      print(row[0]);
+      if (row['checkbox'] != null) {
+        elems.add(Element.fromJson(row['checkbox'], 'Checkbox'));
+        /*elems.add(Checkbox(
+            id: row['checkbox']['id'] as int,
+            idParent: idSheet,
+            text: row['checkbox']['text'] as String,
+            isChecked: row['checkbox']['is_checked'] as bool,
+            idOrder: row['checkbox']['elem_order'] as int));*/
+      } else if (row['image'] != null) {
+        elems.add(Image(
+            id: row['image']['id'] as int,
+            idParent: idSheet,
+            imgPreview: jsonDecode(jsonDecode(row['image']['img_preview'])),
+            imgRaw: Uint8List(0),
+            idOrder: row['image']['id_order'] as int));
+      } else if (row['text'] != null) {
+        elems.add(Text(
+            id: row['text']['id'] as int,
+            idParent: idSheet,
+            text: row['text']['text'] as String,
+            txtType: TextType.values[row['text']['text_type'] as int],
+            idOrder: row['text']['id_order'] as int));
+      }
     }
 
     if (elems.length > 1) {
-      elems = sortElems(elems);
-    }
-
-    for (var i = 1; i < elems.length; i++) {
-      if (elems[i].idOrder < elems[i - 1].idOrder) {
-        var elem = elems[i];
-        elems[i] = elems[i - 1];
-        elems[i - 1] = elem;
-        i = 0;
-      }
+      elems.sort((a, b) => a.idOrder.compareTo(b.idOrder));
     }
     return elems;
   }
 
-  List<Element> sortElems(List<Element> elements) {
-    for (var i = 1; i < elements.length; i++) {
-      if (elements[i].idOrder < elements[i - 1].idOrder) {
-        var elem = elements[i];
-        elements[i] = elements[i - 1];
-        elements[i - 1] = elem;
-        i = 0;
-      }
-    }
-    return elements;
-  }
-
+  ///Test connection with database
   Future<void> test(String database, username, password) async {
     try {
       await db.test(database, username, password);
@@ -135,6 +98,7 @@ class API {
 
   /// SELECT ///
 
+  ///Select cells from database that match with [matchWord]
   Future<List<Cell>> selectCells(
       String database, username, password, Map json) async {
     try {
@@ -149,7 +113,7 @@ class API {
   }
 
   Future<List<Sheet>> selectSheets(
-      String database, username, password, json) async {
+      String database, username, password, Map json) async {
     try {
       var idCell = json['id_cell'];
       var request = 'SELECT id, title, subtitle, idorder FROM sheet WHERE '
@@ -165,13 +129,12 @@ class API {
   Future<Sheet> selectSheet(String database, username, password, json) async {
     try {
       var idCell = json['id_cell'], sheetIndex = json['sheet_index'];
-      var request = 'SELECT id, title, subtitle FROM '
-          'sheet WHERE idcell = $idCell AND idorder = '
-          '$sheetIndex;';
+      var request = 'SELECT * FROM sheet WHERE id_cell = $idCell AND '
+          'sheet_order = $sheetIndex;';
       var result =
           await db.queryWithResult(request, database, username, password);
-      return Sheet(result[0][0] as int, idCell, result[0][1] as String,
-          result[0][2] as String, sheetIndex);
+      print(result);
+      return Sheet.fromJson(result[0]['sheet']);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectSheet\n$e');
     }
@@ -182,16 +145,20 @@ class API {
     try {
       var idSheet = json['id_sheet'];
       List<dynamic> cb, img, txt;
-      var requestCb = 'SELECT id, text, is_checked, elem_order FROM checkbox '
+      var requestCb = 'SELECT * FROM checkbox '
           'WHERE id_sheet = $idSheet ORDER BY elem_order;';
       cb = await db.queryWithResult(requestCb, database, username, password);
-      var requestImg = 'SELECT id, image_preview, elem_order FROM image WHERE '
+
+      var requestImg = 'SELECT * FROM image WHERE '
           'id_sheet = $idSheet ORDER BY elem_order;';
       img = await db.queryWithResult(requestImg, database, username, password);
-      var requestTxt = 'SELECT id, text, type, elem_order FROM text WHERE '
+
+      var requestTxt = 'SELECT * FROM text WHERE '
           'id_sheet = $idSheet ORDER BY elem_order;';
       txt = await db.queryWithResult(requestTxt, database, username, password);
-      return _resultToElems(cb, img, txt, idSheet);
+
+      var elems = cb + img + txt;
+      return _resultToElems(elems, idSheet);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectElements:\n$e');
     }
@@ -220,22 +187,8 @@ class API {
       String title = json['title'],
           subtitle = json['subtitle'],
           type = json['type'];
-      int typeInt;
-      switch (type) {
-        case 'Book':
-          typeInt = 0;
-          break;
-        case 'ToDoList':
-          typeInt = 1;
-          break;
-        case 'Ranking':
-          typeInt = 2;
-          break;
-        default:
-          throw Exception('Unexpected cell type');
-      }
       var request = "CALL add_cell('$title'::text, '$subtitle'::text, "
-          "$typeInt::integer);";
+          "'$type'::text);";
       await db.query(request, database, username, password);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.addCell:\n$e');
@@ -248,7 +201,8 @@ class API {
           title = json['title'],
           subtitle = json['subtitle'];
       var request =
-          "CALL add_sheet($idCell::bigint, '$title'::text, '$subtitle'::text);";
+          "select add_sheet($idCell::bigint, '$title'::text, '$subtitle'::text"
+          ");";
       await db.query(request, database, username, password);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.addSheet: Wrong entries\n$e');
