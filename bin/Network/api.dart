@@ -37,12 +37,7 @@ class API {
     try {
       var sheets = <Sheet>[];
       for (final row in result) {
-        sheets.add(Sheet(
-            row['sheet']['id'] as int,
-            row['sheet']['id_cell'] as int,
-            row['sheet']['title'] as String,
-            row['sheet']['subtitle'] as String,
-            row['sheet']['id_order'] as int));
+        sheets.add(Sheet.fromJson(row['sheet']));
       }
       return sheets;
     } catch (e) {
@@ -97,8 +92,8 @@ class API {
       String database, username, password, Map json) async {
     try {
       var idCell = json['id_cell'];
-      var request = 'SELECT id, title, subtitle, idorder FROM sheet WHERE '
-          'idcell = $idCell ORDER BY idorder;';
+      var request = 'SELECT * FROM sheet WHERE '
+          'id_cell = $idCell ORDER BY sheet_order;';
       var result =
           await db.queryWithResult(request, database, username, password);
       return _resultToSheets(result);
