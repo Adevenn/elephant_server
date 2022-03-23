@@ -24,10 +24,12 @@ class API {
     try {
       var cells = <Cell>[];
       for (final row in result) {
+        print(row);
         cells.add(Cell.fromJson(row['cell']));
       }
       return cells;
     } catch (e) {
+      print('ERROR IN RESULT TO CELL');
       throw DatabaseException('$e');
     }
   }
@@ -45,6 +47,7 @@ class API {
     }
   }
 
+  ///DB values -> List<Element>
   List<Element> _resultToElems(List<dynamic> result, int idSheet) {
     var elems = <Element>[];
     for (final row in result) {
@@ -88,6 +91,7 @@ class API {
     }
   }
 
+  ///Select sheets from database that match with [id_cell]
   Future<List<Sheet>> selectSheets(
       String database, username, password, Map json) async {
     try {
@@ -102,6 +106,7 @@ class API {
     }
   }
 
+  ///Select sheet from database that match with [id_cell] and [sheet_index]
   Future<Sheet> selectSheet(String database, username, password, json) async {
     try {
       var idCell = json['id_cell'], sheetIndex = json['sheet_index'];
@@ -116,6 +121,7 @@ class API {
     }
   }
 
+  ///Select elements from database that match with [id_sheet]
   Future<List<Element>> selectElements(
       String database, username, password, json) async {
     try {
@@ -140,6 +146,7 @@ class API {
     }
   }
 
+  ///Select image from database that match with [id_img]
   Future<String> selectRawImage(
       String database, username, password, json) async {
     try {

@@ -17,9 +17,9 @@ abstract class Cell{
       case 'Book':
         return Book(id, title, subtitle);
       case 'ToDoList':
-        return ToDoList(id: id, title: title);
+        return ToDoList(id: id, title: title, subtitle: subtitle);
       case 'Ranking':
-        return Ranking(id: id, title: title);
+        return Ranking(id: id, title: title, subtitle: subtitle);
       default:
         throw Exception('Json with wrong cell type');
     }
