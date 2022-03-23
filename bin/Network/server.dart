@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import '../Exception/database_exception.dart';
+import '../Exception/server_exception.dart';
 import 'api.dart';
 
 class Server {
@@ -14,97 +15,109 @@ class Server {
   }
 
   void start() async {
-    var server = await HttpServer.bind(_ipServer, _portServer);
-    //https
-    /*var server = await HttpServer.bindSecure('127.0.0.1', 443,
+    try {
+      var server = await HttpServer.bind(_ipServer, _portServer);
+      //https
+      /*var server = await HttpServer.bindSecure('127.0.0.1', 443,
         SecurityContext());*/
+      print('/* WAITING FOR REQUESTS */');
 
-    await for (HttpRequest request in server) {
-      print('NEW REQUEST : ${request.requestedUri.path}\n');
-      if (request.method == 'POST' &&
-          request.headers.contentType?.mimeType == 'application/json') {
-        var json = jsonDecode(await utf8.decoder.bind(request).join());
-        print('content : $json');
-        switch (request.requestedUri.path) {
-          case '/init':
-            init(request, json);
-            break;
-          case '/cells':
-            cells(request, json);
-            break;
-          case '/sheets':
-            sheets(request, json);
-            break;
-          case '/sheet':
-            sheet(request, json);
-            break;
-          case '/elements':
-            elements(request, json);
-            break;
-          case '/addCell':
-            addCell(request, json);
-            break;
-          case '/addSheet':
-            addSheet(request, json);
-            break;
-          case '/addCheckbox':
-            addCheckbox(request, json);
-            break;
-          case '/addImage':
-            addImage(request, json);
-            break;
-          case '/addText':
-            addText(request, json);
-            break;
-          case '/deleteCell':
-            deleteCell(request, json);
-            break;
-          case '/deleteSheet':
-            deleteSheet(request, json);
-            break;
-          case '/deleteElement':
-            deleteElement(request, json);
-            break;
-          case '/updateCell':
-            updateCell(request, json);
-            break;
-          case '/updateSheet':
-            updateSheet(request, json);
-            break;
-          case '/updateCheckbox':
-            updateCheckbox(request, json);
-            break;
-          case '/updateText':
-            updateText(request, json);
-            break;
-          case '/updateSheetOrder':
-            updateSheetOrder(request, json);
-            break;
-          case '/updateElementOrder':
-            updateElementOrder(request, json);
-            break;
-          default:
-            request.response
-              ..statusCode = HttpStatus.notFound
-              ..write('404 Not Found');
-            break;
+      await for (HttpRequest request in server) {
+        print('/* NEW REQUEST : ${request.requestedUri.path} */');
+        if (request.method == 'POST' &&
+            request.headers.contentType?.mimeType == 'application/json') {
+          var json = jsonDecode(await utf8.decoder.bind(request).join());
+          print('content : $json');
+          switch (request.requestedUri.path) {
+            case '/init':
+              init(request, json);
+              break;
+            case '/cells':
+              await cells(request, json);
+              break;
+            case '/sheets':
+              sheets(request, json);
+              break;
+            case '/sheet':
+              sheet(request, json);
+              break;
+            case '/elements':
+              elements(request, json);
+              break;
+            case '/rawImage':
+              rawImage(request, json);
+              break;
+            case '/addCell':
+              addCell(request, json);
+              break;
+            case '/addSheet':
+              addSheet(request, json);
+              break;
+            case '/addCheckbox':
+              addCheckbox(request, json);
+              break;
+            case '/addImage':
+              addImage(request, json);
+              break;
+            case '/addText':
+              addText(request, json);
+              break;
+            case '/deleteCell':
+              deleteCell(request, json);
+              break;
+            case '/deleteSheet':
+              deleteSheet(request, json);
+              break;
+            case '/deleteElement':
+              deleteElement(request, json);
+              break;
+            case '/updateCell':
+              updateCell(request, json);
+              break;
+            case '/updateSheet':
+              updateSheet(request, json);
+              break;
+            case '/updateCheckbox':
+              updateCheckbox(request, json);
+              break;
+            case '/updateText':
+              updateText(request, json);
+              break;
+            case '/updateSheetOrder':
+              updateSheetOrder(request, json);
+              break;
+            case '/updateElementOrder':
+              updateElementOrder(request, json);
+              break;
+            default:
+              request.response
+                ..statusCode = HttpStatus.notFound
+                ..write('404 Not Found');
+              break;
+          }
+        } else {
+          request.response
+            ..statusCode = HttpStatus.notFound
+            ..write('404 Not Found');
         }
-      } else {
-        request.response
-          ..statusCode = HttpStatus.notFound
-          ..write('404 Not Found');
+        await request.response.close();
+        print('/* REQUEST DONE : ${request.requestedUri.path} */');
       }
-      await request.response.close();
+    } catch (e) {
+      print('/* ERROR : */\n$e');
+      start();
     }
   }
 
-  void _serverError(HttpRequest request) {
+  void _serverError(HttpRequest request, ServerException e) {
+    print('*** Exception $e');
     request.response
       ..statusCode = HttpStatus.internalServerError
       ..write('500 Internal Server Error');
   }
 
-  void _dbError(HttpRequest request) {
+  void _dbError(HttpRequest request, DatabaseException e) {
+    print('*** Exception $e');
     request.response
       ..statusCode = HttpStatus.serviceUnavailable
       ..write('503 ServiceUnavailable');
@@ -118,22 +131,25 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('test ok');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
     }
   }
 
   /// SELECT ///
 
   ///Get cells
-  void cells(HttpRequest request, Map json) async {
+  Future<void> cells(HttpRequest request, Map json) async {
     try {
-      var cells = await _api.selectCells(
-          json['database'], json['username'], json['password'], json['json']);
+      var cells = await _api.selectCells(json['database'], json['username'],
+          json['password'], jsonDecode(json['json']));
+      print(cells);
       request.response
         ..statusCode = HttpStatus.ok
         ..write(jsonEncode(cells));
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -146,7 +162,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write(jsonEncode(sheets));
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -159,7 +177,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write(jsonEncode(sheet));
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -172,7 +192,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write(jsonEncode(elements));
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -185,7 +207,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write(jsonEncode(img));
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -200,7 +224,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -213,7 +239,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -226,7 +254,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -239,7 +269,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -252,7 +284,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -267,7 +301,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -280,7 +316,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -293,7 +331,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -308,7 +348,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -321,7 +363,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -334,7 +378,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -347,7 +393,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -360,7 +408,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 
@@ -373,7 +423,9 @@ class Server {
         ..statusCode = HttpStatus.ok
         ..write('process done');
     } on DatabaseException catch (e) {
-      _dbError(request);
+      _dbError(request, e);
+    } on ServerException catch (e) {
+      _serverError(request, e);
     }
   }
 }

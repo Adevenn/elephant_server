@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import '../Exception/database_exception.dart';
+import '../Exception/server_exception.dart';
 import '../Model/cell.dart';
 import '../Model/CellComponents/book.dart';
 import '../Model/CellComponents/ranking.dart';
@@ -49,21 +50,18 @@ class API {
     try {
       var cells = <Cell>[];
       for (final row in result) {
-        switch (row[3] as int) {
+        var id = row['cell']['id'] as int;
+        var title = row['cell']['title'] as String;
+        var subtitle = row['cell']['subtitle'] as String;
+        switch (row['cell']['type'] as int) {
           case 0:
-            cells.add(Book(row[0] as int, row[1] as String, row[2] as String));
+            cells.add(Book(id, title, subtitle));
             break;
           case 1:
-            cells.add(ToDoList(
-                id: row[0] as int,
-                title: row[1] as String,
-                subtitle: row[2] as String));
+            cells.add(ToDoList(id: id, title: title, subtitle: subtitle));
             break;
           case 2:
-            cells.add(Ranking(
-                id: row[0] as int,
-                title: row[1] as String,
-                subtitle: row[2] as String));
+            cells.add(Ranking(id: id, title: title, subtitle: subtitle));
             break;
           default:
             throw DatabaseException('Not an existing type of cell');
@@ -71,7 +69,7 @@ class API {
       }
       return cells;
     } catch (e) {
-      throw DatabaseException('$_className._cellsFromRawValues:\n$e}');
+      throw DatabaseException('$e');
     }
   }
 
@@ -137,11 +135,10 @@ class API {
   }
 
   Future<List<Cell>> selectCells(
-      String database, username, password, json) async {
+      String database, username, password, Map json) async {
     try {
-      var request =
-          "SELECT * FROM cell WHERE title LIKE '%${json['match_word']}%' ORDER"
-          " BY title;";
+      var matchWord = json['match_word'];
+      var request = "select * from cell where title like '%$matchWord%';";
       var result =
           await db.queryWithResult(request, database, username, password);
       return _resultToCells(result);
@@ -219,9 +216,9 @@ class API {
 
   Future<void> addCell(String database, username, password, json) async {
     try {
-      String type = json['type'],
-          title = json['title'],
-          subtitle = json['subtitle'];
+      String title = json['title'],
+          subtitle = json['subtitle'],
+          type = json['type'];
       int typeInt;
       switch (type) {
         case 'Book':
@@ -272,10 +269,10 @@ class API {
   Future<void> addImage(String database, username, password, json) async {
     try {
       var idSheet = json['id_sheet'];
-      var jsonImgPreview = jsonEncode({'img_preview': json['img_preview']});
-      var jsonImgRaw = jsonEncode({'img_raw': json['img_raw']});
-      var request = "CALL add_image($idSheet::bigint, '$jsonImgPreview'::text"
-          ", '$jsonImgRaw'::text);";
+      var imgPreview = jsonEncode({'img_preview': json['img_preview']});
+      var imgRaw = jsonEncode({'img_raw': json['img_raw']});
+      var request = "CALL add_image($idSheet::bigint, '$imgPreview'::text"
+          ", '$imgRaw'::text);";
       await db.query(request, database, username, password);
     } catch (e) {
       throw DatabaseException('$_className.addImage: Connection lost\n$e');
@@ -284,7 +281,7 @@ class API {
 
   Future<void> addText(String database, username, password, json) async {
     try {
-      var idSheet = json['id_sheet'], type = json['type'];
+      var idSheet = json['id_sheet'], type = json['txt_type'];
       var request = 'CALL add_text($idSheet::bigint, $type::integer);';
       await db.query(request, database, username, password);
     } catch (e) {
@@ -296,7 +293,7 @@ class API {
 
   Future<void> deleteCell(String database, username, password, json) async {
     try {
-      var idCell = json['id_cell'];
+      var idCell = json['id'];
       var request = 'CALL delete_cell($idCell::bigint);';
       await db.query(request, database, username, password);
     } catch (e) {
@@ -306,7 +303,7 @@ class API {
 
   Future<void> deleteSheet(String database, username, password, json) async {
     try {
-      var idSheet = json['id_sheet'];
+      var idSheet = json['id'];
       var request = 'CALL delete_sheet($idSheet::bigint);';
       await db.query(request, database, username, password);
     } catch (e) {
@@ -316,7 +313,7 @@ class API {
 
   Future<void> deleteElement(String database, username, password, json) async {
     try {
-      var idElement = json['id_element'];
+      var idElement = json['id'];
       var request = 'CALL delete_element($idElement::bigint);';
       await db.query(request, database, username, password);
     } catch (e) {
@@ -380,7 +377,7 @@ class API {
   Future<void> updateSheetOrder(
       String database, username, password, json) async {
     try {
-      Iterable l = json.decode(json['sheets']);
+      Iterable l = jsonDecode(json['sheets']);
       var sheets = List<Sheet>.from(l.map((model) => Sheet.fromJson(model)));
       for (var i = 0; i < sheets.length; i++) {
         if (sheets[i].idOrder != i) {
@@ -397,7 +394,7 @@ class API {
   Future<void> updateElementOrder(
       String database, username, password, json) async {
     try {
-      Iterable l = json.decode(json['elements']);
+      Iterable l = jsonDecode(json['elements']);
       var elements = List<Sheet>.from(l.map((model) => Sheet.fromJson(model)));
       var ids = <int>[], orders = <int>[];
       for (var i = 0; i < elements.length; i++) {
