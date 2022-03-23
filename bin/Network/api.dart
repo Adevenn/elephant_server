@@ -52,20 +52,13 @@ class API {
 
   List<Element> _resultToElems(List<dynamic> result, int idSheet) {
     var elems = <Element>[];
-    //print(result);
-    //Extract data from db values and create objects
     for (final row in result) {
       if (row['checkbox'] != null) {
         elems.add(Element.fromJson(row['checkbox']));
       } else if (row['image'] != null) {
         elems.add(Element.fromJson(row['image']));
       } else if (row['text'] != null) {
-        elems.add(Text(
-            id: row['text']['id'] as int,
-            idParent: idSheet,
-            text: row['text']['text'] as String,
-            txtType: TextType.values[row['text']['text_type'] as int],
-            idOrder: row['text']['id_order'] as int));
+        elems.add(Element.fromJson(row['text']));
       }
     }
 
@@ -157,13 +150,10 @@ class API {
     try {
       var idImg = json['id_img'];
       var request = 'SELECT image_raw FROM image WHERE id = $idImg;';
-      var rawImgResult =
+      var rawImg =
           await db.queryWithResult(request, database, username, password);
-      for (final rawImg in rawImgResult) {
-        print(rawImg['image']['image_raw']);
-        return rawImg['image']['image_raw'];
-      }
-      throw Exception('No rawImage found with id : $idImg');
+      print(rawImg[0]['image']['image_raw']);
+      return rawImg[0]['image']['image_raw'];
     } catch (e) {
       throw Exception('$_className.selectRawImage:\n$e');
     }
