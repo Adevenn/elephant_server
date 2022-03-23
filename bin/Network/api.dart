@@ -21,15 +21,15 @@ class API {
 
   ///DB values -> List<Cell>
   List<Cell> _resultToCells(List<dynamic> result) {
-    //try {
+    try {
       var cells = <Cell>[];
       for (final row in result) {
         cells.add(Cell.fromJson(row['cell']));
       }
       return cells;
-    /*} catch (e) {
+    } catch (e) {
       throw DatabaseException('$e');
-    }*/
+    }
   }
 
   ///DB values -> List<Sheet>
@@ -52,25 +52,13 @@ class API {
 
   List<Element> _resultToElems(List<dynamic> result, int idSheet) {
     var elems = <Element>[];
-    print(result);
+    //print(result);
     //Extract data from db values and create objects
     for (final row in result) {
-      print(row[0]);
       if (row['checkbox'] != null) {
-        elems.add(Element.fromJson(row['checkbox'], 'Checkbox'));
-        /*elems.add(Checkbox(
-            id: row['checkbox']['id'] as int,
-            idParent: idSheet,
-            text: row['checkbox']['text'] as String,
-            isChecked: row['checkbox']['is_checked'] as bool,
-            idOrder: row['checkbox']['elem_order'] as int));*/
+        elems.add(Element.fromJson(row['checkbox']));
       } else if (row['image'] != null) {
-        elems.add(Image(
-            id: row['image']['id'] as int,
-            idParent: idSheet,
-            imgPreview: jsonDecode(jsonDecode(row['image']['img_preview'])),
-            imgRaw: Uint8List(0),
-            idOrder: row['image']['id_order'] as int));
+        elems.add(Element.fromJson(row['image']));
       } else if (row['text'] != null) {
         elems.add(Text(
             id: row['text']['id'] as int,
@@ -172,7 +160,8 @@ class API {
       var rawImgResult =
           await db.queryWithResult(request, database, username, password);
       for (final rawImg in rawImgResult) {
-        return rawImg[0] as String;
+        print(rawImg['image']['image_raw']);
+        return rawImg['image']['image_raw'];
       }
       throw Exception('No rawImage found with id : $idImg');
     } catch (e) {
