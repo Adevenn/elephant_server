@@ -166,11 +166,13 @@ class API {
 
   Future<void> addCell(String database, username, password, json) async {
     try {
-      String title = json['title'],
+      var title = json['title'],
           subtitle = json['subtitle'],
-          type = json['type'];
+          type = json['type'],
+          author = json['author'],
+          isPublic = json['is_public'];
       var request = "CALL add_cell('$title'::text, '$subtitle'::text, "
-          "'$type'::text);";
+          "'$type'::text, '$author'::text, $isPublic::boolean);";
       await db.query(request, database, username, password);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.addCell:\n$e');
@@ -264,9 +266,12 @@ class API {
     try {
       var idCell = json['id_cell'],
           title = json['title'],
-          subtitle = json['subtitle'];
+          subtitle = json['subtitle'],
+          author = json['author'],
+          isPublic = json['is_public'];
       var request =
-          "CALL update_cell($idCell::bigint, '$title'::text, '$subtitle'::text);";
+          "CALL update_cell($idCell::bigint, '$title'::text, '$subtitle'::tex"
+          "t), '$author'::text, $isPublic::boolean;";
       await db.query(request, database, username, password);
     } catch (e) {
       throw DatabaseException('$_className.updateCell: Connection lost\n$e');

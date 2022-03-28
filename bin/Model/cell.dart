@@ -1,32 +1,59 @@
-import '../Model/Cells/ranking.dart';
-import '../Model/Cells/to_do_list.dart';
-
+import 'Cells/ranking.dart';
+import 'Cells/to_do_list.dart';
 import 'Cells/Book/book.dart';
 
-abstract class Cell{
+abstract class Cell {
   final int id;
   String title;
   String subtitle;
   final String type;
+  String author;
+  bool isPublic;
 
+  Cell(
+      {required this.id,
+      required this.title,
+      required this.subtitle,
+      required this.type,
+      required this.author,
+      required this.isPublic});
 
-  Cell({required this.id, required this.title, required this.subtitle, required this.type});
-
-  factory Cell.factory({required int id, required String title, required String subtitle, required String type}){
-    switch(type){
+  factory Cell.factory(
+      {required int id,
+      required String title,
+      required String subtitle,
+      required String type,
+      required String author,
+      required bool isPublic}) {
+    switch (type) {
       case 'Book':
-        return Book(id, title, subtitle);
+        return Book(
+            id: id,
+            title: title,
+            subtitle: subtitle,
+            author: author,
+            isPublic: isPublic);
       case 'ToDoList':
-        return ToDoList(id: id, title: title, subtitle: subtitle);
+        return ToDoList(
+            id: id,
+            title: title,
+            subtitle: subtitle,
+            author: author,
+            isPublic: isPublic);
       case 'Ranking':
-        return Ranking(id: id, title: title, subtitle: subtitle);
+        return Ranking(
+            id: id,
+            title: title,
+            subtitle: subtitle,
+            author: author,
+            isPublic: isPublic);
       default:
-        throw Exception('Json with wrong cell type');
+        throw Exception('Factory with wrong cell type');
     }
   }
 
-  factory Cell.fromJson(Map<String, dynamic> json){
-    switch(json['type']){
+  factory Cell.fromJson(Map<String, dynamic> json) {
+    switch (json['type']) {
       case 'Book':
         return Book.fromJson(json);
       case 'ToDoList':
@@ -34,14 +61,16 @@ abstract class Cell{
       case 'Ranking':
         return Ranking.fromJson(json);
       default:
-        throw Exception('Wrong cell type');
+        throw Exception('Json with wrong cell type');
     }
   }
 
   Map<String, dynamic> toJson() => {
-    'id_cell' : id,
-    'title' : title,
-    'subtitle' : subtitle,
-    'type' : type,
-  };
+        'id_cell': id,
+        'title': title,
+        'subtitle': subtitle,
+        'type': type,
+        'author': author,
+        'is_public': isPublic
+      };
 }
