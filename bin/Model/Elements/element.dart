@@ -39,7 +39,7 @@ abstract class Element {
             txtType: TextType.values[json['txt_type']],
             idOrder: json['elem_order']);
       default:
-        throw Exception('Json with wrong element type');
+        throw Exception('Json with wrong element type\n$json');
     }
   }
 

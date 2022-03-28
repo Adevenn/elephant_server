@@ -51,6 +51,7 @@ class API {
   List<Element> _resultToElems(List<dynamic> result, int idSheet) {
     var elems = <Element>[];
     for (final row in result) {
+      print(row);
       if (row['checkbox'] != null) {
         elems.add(Element.fromJson(row['checkbox']));
       } else if (row['image'] != null) {
@@ -287,7 +288,7 @@ class API {
 
   Future<void> updateCheckbox(String database, username, password, json) async {
     try {
-      var idElem = json['id_elem'],
+      var idElem = json['id'],
           isCheck = json['is_checked'],
           text = json['text'];
       var request =
@@ -295,6 +296,7 @@ class API {
           "text);";
       await db.query(request, database, username, password);
     } catch (e) {
+      print('ERROR UPDATE CB : $e');
       throw DatabaseException(
           '$_className.updateCheckbox: Connection lost\n$e');
     }
@@ -302,7 +304,7 @@ class API {
 
   Future<void> updateText(String database, username, password, json) async {
     try {
-      var idElem = json['id_elem'], text = json['text'];
+      var idElem = json['id'], text = json['text'];
       var request = "CALL update_text($idElem::bigint, '$text'::text);";
       await db.query(request, database, username, password);
     } catch (e) {
@@ -313,8 +315,8 @@ class API {
   Future<void> updateSheetOrder(
       String database, username, password, json) async {
     try {
-      Iterable l = jsonDecode(json['sheets']);
-      var sheets = List<Sheet>.from(l.map((model) => Sheet.fromJson(model)));
+      var sheets = List<Sheet>.from(
+          json.map((model) => Sheet.fromJson(jsonDecode(model))));
       for (var i = 0; i < sheets.length; i++) {
         if (sheets[i].idOrder != i) {
           var request = 'CALL update_sheet_order(${sheets[i].id}::bigint, '
@@ -330,8 +332,8 @@ class API {
   Future<void> updateElementOrder(
       String database, username, password, json) async {
     try {
-      Iterable l = jsonDecode(json['elements']);
-      var elements = List<Sheet>.from(l.map((model) => Sheet.fromJson(model)));
+      var elements = List<Element>.from(
+          json.map((model) => Element.fromJson(jsonDecode(model))));
       var ids = <int>[], orders = <int>[];
       for (var i = 0; i < elements.length; i++) {
         ids.add(elements[i].id);

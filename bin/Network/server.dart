@@ -27,7 +27,7 @@ class Server {
           request.headers.contentType?.mimeType == 'application/json') {
         try {
           var requestJson = jsonDecode(await utf8.decoder.bind(request).join());
-          print(requestJson);
+          //print(requestJson);
           var db = requestJson['database'];
           var username = requestJson['username'];
           var password = requestJson['password'];
