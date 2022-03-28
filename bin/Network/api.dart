@@ -24,7 +24,6 @@ class API {
     try {
       var cells = <Cell>[];
       for (final row in result) {
-        print(row);
         cells.add(Cell.fromJson(row['cell']));
       }
       return cells;
@@ -51,7 +50,6 @@ class API {
   List<Element> _resultToElems(List<dynamic> result, int idSheet) {
     var elems = <Element>[];
     for (final row in result) {
-      print(row);
       if (row['checkbox'] != null) {
         elems.add(Element.fromJson(row['checkbox']));
       } else if (row['image'] != null) {
@@ -60,7 +58,6 @@ class API {
         elems.add(Element.fromJson(row['text']));
       }
     }
-
     if (elems.length > 1) {
       elems.sort((a, b) => a.idOrder.compareTo(b.idOrder));
     }
@@ -82,8 +79,10 @@ class API {
   Future<List<Cell>> selectCells(
       String database, username, password, Map json) async {
     try {
+      print('username : $username');
       var matchWord = json['match_word'];
-      var request = "select * from cell where title like '%$matchWord%';";
+      var request = "select * from cell where title LIKE '%$matchWord%' AND "
+          "author = '$username' OR is_public = true ORDER BY title;";
       var result =
           await db.queryWithResult(request, database, username, password);
       return _resultToCells(result);
