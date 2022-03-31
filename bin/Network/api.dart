@@ -1,13 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import '../Exception/database_exception.dart';
 import '../Model/cell.dart';
 import '../Model/Elements/element.dart';
-import '../Model/Elements/image.dart';
-import '../Model/Elements/text_type.dart';
-import '../Model/Elements/text.dart';
 import '../Model/Cells/Book/sheet.dart';
 import 'database.dart';
 
