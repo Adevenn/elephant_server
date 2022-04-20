@@ -1,16 +1,18 @@
 import 'package:postgres/postgres.dart';
 
 import '../Exception/database_exception.dart';
+import '../Model/constants.dart';
 
 class DB {
-  final String _ip;
-  final int _port;
+  final String username;
+  final String password;
 
-  DB(this._ip, this._port);
+  DB({required this.username, required this.password});
 
-  Future<void> test(String database, username, password) async{
+  Future<void> test() async {
     try {
-      var connection = PostgreSQLConnection(_ip, _port, database,
+      var connection = PostgreSQLConnection(
+          Constants.dataIP, Constants.dataPort, Constants.dataName,
           username: username, password: password, timeoutInSeconds: 3);
       await connection.open();
       await connection.close();
@@ -19,9 +21,10 @@ class DB {
     }
   }
 
-  Future<void> query(String request, database, username, password) async {
+  Future<void> query(String request) async {
     try {
-      var connection = PostgreSQLConnection(_ip, _port, database,
+      var connection = PostgreSQLConnection(
+          Constants.dataIP, Constants.dataPort, Constants.dataName,
           username: username, password: password, timeoutInSeconds: 3);
       await connection.open();
       await connection.query(request);
@@ -31,10 +34,10 @@ class DB {
     }
   }
 
-  Future<List<dynamic>> queryWithResult(
-      String request, database, username, password) async {
+  Future<List<dynamic>> queryWithResult(String request) async {
     try {
-      var connection = PostgreSQLConnection(_ip, _port, database,
+      var connection = PostgreSQLConnection(
+          Constants.dataIP, Constants.dataPort, Constants.dataName,
           username: username, password: password, timeoutInSeconds: 3);
       await connection.open();
       var result =
