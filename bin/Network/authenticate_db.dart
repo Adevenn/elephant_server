@@ -13,7 +13,6 @@ class AuthenticateDB {
   Future<void> tryAddAccount(String username, String password) async {
     try{
       var hashPwd = Hash.hashString(password);
-      print(hashPwd);
       var connection = PostgreSQLConnection(
           Constants.authIP, Constants.authPort, Constants.authName,
           username: authUsername, password: authPwd, timeoutInSeconds: 3);
@@ -24,7 +23,7 @@ class AuthenticateDB {
       await connection.close();
     } catch(e){
       print(e);
-      throw DatabaseException('$e');
+      throw DatabaseException('AuthenticateDB.tryAddAccount:\n$e');
     }
   }
 
@@ -44,11 +43,10 @@ class AuthenticateDB {
       request =
           "CALL sign_in('$username', '${Hash.hashWithSalt(password + salt)}');";
       result = await connection.mappedResultsQuery(request);
-      print(result);
       await connection.close();
     } catch (e) {
       print(e);
-      throw DatabaseException('$e');
+      throw DatabaseException('AuthenticateDB.trySignIn:\n$e');
     }
   }
 }

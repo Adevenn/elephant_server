@@ -148,8 +148,8 @@ class API {
           type = json['type'],
           author = json['author'],
           isPublic = json['is_public'];
-      var request = "CALL add_cell('$title'::text, '$subtitle'::text, "
-          "'$type'::text, '$author'::text, $isPublic::boolean);";
+      var request =
+          "CALL add_cell('$title', '$subtitle', '$type', '$author', $isPublic::boolean);";
       await db.query(request);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.addCell:\n$e');
@@ -293,10 +293,10 @@ class API {
     }
   }
 
-  Future<void> updateSheetOrder(Iterable<dynamic> json) async {
+  Future<void> updateSheetOrder(Map json) async {
     try {
-      var sheets = List<Sheet>.from(
-          json.map((model) => Sheet.fromJson(jsonDecode(model))));
+      var sheets = List<Sheet>.from(json['sheet_order']
+          .map((model) => Sheet.fromJson(jsonDecode(model))));
       for (var i = 0; i < sheets.length; i++) {
         if (sheets[i].idOrder != i) {
           var request = 'CALL update_sheet_order(${sheets[i].id}::bigint, '
@@ -309,10 +309,10 @@ class API {
     }
   }
 
-  Future<void> updateElementOrder(Iterable<dynamic> json) async {
+  Future<void> updateElementOrder(Map json) async {
     try {
-      var elements = List<Element>.from(
-          json.map((model) => Element.fromJson(jsonDecode(model))));
+      var elements = List<Element>.from(json['elem_order']
+          .map((model) => Element.fromJson(jsonDecode(model))));
       var ids = <int>[], orders = <int>[];
       for (var i = 0; i < elements.length; i++) {
         ids.add(elements[i].id);
