@@ -1,7 +1,7 @@
-import 'element.dart';
+import 'element_custom.dart';
 import 'text_type.dart';
 
-class TextCustom extends Element {
+class TextCustom extends ElementCustom {
   String text;
   late TextType txtType;
 

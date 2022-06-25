@@ -6,14 +6,14 @@ import 'image_custom.dart';
 import 'text_custom.dart';
 import 'text_type.dart';
 
-abstract class Element {
+abstract class ElementCustom {
   final int id;
   final int idParent;
   int idOrder;
 
-  Element({required this.id, required this.idParent, required this.idOrder});
+  ElementCustom({required this.id, required this.idParent, required this.idOrder});
 
-  factory Element.fromJson(Map<String, dynamic> json) {
+  factory ElementCustom.fromJson(Map<String, dynamic> json) {
     switch (json['type']) {
       case 'CheckboxCustom':
         return CheckboxCustom(

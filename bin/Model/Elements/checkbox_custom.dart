@@ -1,6 +1,6 @@
-import 'element.dart';
+import 'element_custom.dart';
 
-class CheckboxCustom extends Element{
+class CheckboxCustom extends ElementCustom{
   bool isChecked;
   String text;
 

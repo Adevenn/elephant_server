@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import '../Exception/database_exception.dart';
 import '../Model/cell.dart';
-import '../Model/Elements/element.dart';
+import '../Model/Elements/element_custom.dart';
 import '../Model/Cells/Book/sheet.dart';
 import 'data_db.dart';
 
@@ -43,15 +43,15 @@ class API {
   }
 
   ///DB values -> List<Element>
-  List<Element> _resultToElems(List<dynamic> result, int idSheet) {
-    var elems = <Element>[];
+  List<ElementCustom> _resultToElems(List<dynamic> result, int idSheet) {
+    var elems = <ElementCustom>[];
     for (final row in result) {
       if (row['checkbox'] != null) {
-        elems.add(Element.fromJson(row['checkbox']));
+        elems.add(ElementCustom.fromJson(row['checkbox']));
       } else if (row['image'] != null) {
-        elems.add(Element.fromJson(row['image']));
+        elems.add(ElementCustom.fromJson(row['image']));
       } else if (row['text'] != null) {
-        elems.add(Element.fromJson(row['text']));
+        elems.add(ElementCustom.fromJson(row['text']));
       }
     }
     if (elems.length > 1) {
@@ -104,7 +104,7 @@ class API {
   }
 
   ///Select elements from database that match with [id_sheet]
-  Future<List<Element>> selectElements(Map json) async {
+  Future<List<ElementCustom>> selectElements(Map json) async {
     try {
       var idSheet = json['id_sheet'];
       List<dynamic> cb, img, txt;
@@ -300,8 +300,8 @@ class API {
           .map((model) => Sheet.fromJson(jsonDecode(model))));
       for (var i = 0; i < sheets.length; i++) {
         if (sheets[i].idOrder != i) {
-          var request = 'CALL update_sheet_order(${sheets[i].id}::bigint, '
-              '${sheets[i].idOrder}::int);';
+          var request =
+              'CALL update_sheet_order(${sheets[i].id}::bigint, $i::int);';
           await db.query(request);
         }
       }
@@ -312,17 +312,12 @@ class API {
 
   Future<void> updateElementOrder(Map json) async {
     try {
-      var elements = List<Element>.from(json['elem_order']
-          .map((model) => Element.fromJson(jsonDecode(model))));
-      var ids = <int>[], orders = <int>[];
+      var elements = List<ElementCustom>.from(json['elem_order']
+          .map((model) => ElementCustom.fromJson(jsonDecode(model))));
       for (var i = 0; i < elements.length; i++) {
-        ids.add(elements[i].id);
-        orders.add(elements[i].idOrder);
-      }
-      for (var i = 0; i < ids.length; i++) {
-        if (orders[i] != i) {
+        if (elements[i].idOrder != i) {
           var request =
-              'CALL update_element_order(${ids[i]}::bigint, $i::int);';
+              'CALL update_element_order(${elements[i].id}::bigint, $i::int);';
           await db.query(request);
         }
       }

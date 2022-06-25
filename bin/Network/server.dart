@@ -62,8 +62,7 @@ class Server {
                   await _responseOK(request, jsonEncode(sheet));
                   break;
                 case '/elements':
-                  var elements =
-                  await _api.selectElements(json);
+                  var elements = await _api.selectElements(json);
                   await _responseOK(request, jsonEncode(elements));
                   break;
                 case '/rawImage':

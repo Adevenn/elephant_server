@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'element.dart';
+import 'element_custom.dart';
 
-class ImageCustom extends Element {
+class ImageCustom extends ElementCustom {
   Uint8List imgPreview;
   Uint8List imgRaw;
 
