@@ -30,7 +30,6 @@ class DB {
       await connection.query(request);
       await connection.close();
     } catch (e) {
-      print(e);
       throw DatabaseException('DB.query: Error in the process\n$e');
     }
   }
@@ -46,7 +45,6 @@ class DB {
       await connection.close();
       return result;
     } catch (e) {
-      print(e);
       throw DatabaseException('DB.queryWithResult: Error in the process\n$e');
     }
   }

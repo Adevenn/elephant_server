@@ -133,7 +133,7 @@ class Server {
                   break;
               }
             } catch (e) {
-              throw DatabaseException();
+              throw DatabaseException('$e');
             }
           }
         } on DatabaseException catch (e) {
@@ -158,14 +158,14 @@ class Server {
   }
 
   void _serverError(HttpRequest request, ServerException e) {
-    print('*** Exception $e');
+    print('*** Server Error (code 500) :\n$e');
     request.response
       ..statusCode = HttpStatus.internalServerError
       ..write('500 Internal Server Error');
   }
 
   void _dbError(HttpRequest request, DatabaseException e) {
-    print('*** Exception $e');
+    print('*** Database Error (code 503) :\n$e');
     request.response
       ..statusCode = HttpStatus.serviceUnavailable
       ..write('503 ServiceUnavailable');

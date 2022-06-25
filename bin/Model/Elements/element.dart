@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'checkbox.dart';
-import 'image.dart';
-import 'text.dart';
+import 'checkbox_custom.dart';
+import 'image_custom.dart';
+import 'text_custom.dart';
 import 'text_type.dart';
 
 abstract class Element {
@@ -15,24 +15,24 @@ abstract class Element {
 
   factory Element.fromJson(Map<String, dynamic> json) {
     switch (json['type']) {
-      case 'Checkbox':
-        return Checkbox(
+      case 'CheckboxCustom':
+        return CheckboxCustom(
             id: json['id'],
             idParent: json['id_sheet'],
             isChecked: json['is_checked'],
             text: json['text'],
             idOrder: json['elem_order']);
-      case 'Image':
+      case 'ImageCustom':
         var imgPreview = jsonDecode(json['image_preview']);
-        return Image(
+        return ImageCustom(
             id: json['id'],
             idParent: json['id_sheet'],
             imgPreview:
                 Uint8List.fromList(imgPreview['img_preview'].cast<int>()),
             imgRaw: Uint8List(0),
             idOrder: json['elem_order']);
-      case 'Text':
-        return Text(
+      case 'TextCustom':
+        return TextCustom(
             id: json['id'],
             idParent: json['id_sheet'],
             text: json['text'],

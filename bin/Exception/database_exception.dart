@@ -4,5 +4,5 @@ class DatabaseException implements Exception {
   DatabaseException([this.message = '']);
 
   @override
-  String toString() => 'Wrong database identifiers: $message';
+  String toString() => message;
 }

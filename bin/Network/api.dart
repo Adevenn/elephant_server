@@ -219,6 +219,7 @@ class API {
   Future<void> deleteSheet(Map json) async {
     try {
       var idSheet = json['id'];
+      print(idSheet);
       var request = 'CALL delete_sheet($idSheet::bigint);';
       await db.query(request);
     } catch (e) {

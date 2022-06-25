@@ -2,11 +2,11 @@ import 'dart:typed_data';
 
 import 'element.dart';
 
-class Image extends Element {
+class ImageCustom extends Element {
   Uint8List imgPreview;
   Uint8List imgRaw;
 
-  Image(
+  ImageCustom(
       {required int id,
       required int idParent,
       required this.imgPreview,

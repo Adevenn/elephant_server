@@ -1,11 +1,11 @@
 import 'element.dart';
 import 'text_type.dart';
 
-class Text extends Element {
+class TextCustom extends Element {
   String text;
   late TextType txtType;
 
-  Text(
+  TextCustom(
       {required this.text,
       required this.txtType,
       required int id,
