@@ -11,15 +11,15 @@ class TextCustom extends ElementCustom {
       required int id,
       required int idParent,
       required int idOrder})
-      : super(id: id, idParent: idParent, idOrder: idOrder);
+      : super(id: id, idSheet: idParent, idOrder: idOrder);
 
   @override
   Map<String, dynamic> toJson() => {
         'id': id,
-        'id_sheet': idParent,
-        'text': text,
+        'id_sheet': idSheet,
+        'txt_text': text,
         'txt_type': txtType.index,
         'elem_order': idOrder,
-        'type': runtimeType.toString(),
+        'elem_type': runtimeType.toString(),
       };
 }

@@ -43,21 +43,16 @@ class API {
   }
 
   ///DB values -> List<Element>
-  List<ElementCustom> _resultToElems(List<dynamic> result, int idSheet) {
-    var elems = <ElementCustom>[];
-    for (final row in result) {
-      if (row['checkbox'] != null) {
-        elems.add(ElementCustom.fromJson(row['checkbox']));
-      } else if (row['image'] != null) {
-        elems.add(ElementCustom.fromJson(row['image']));
-      } else if (row['text'] != null) {
-        elems.add(ElementCustom.fromJson(row['text']));
+  List<ElementCustom> _resultToElems(List<dynamic> result) {
+    try {
+      var elems = <ElementCustom>[];
+      for (final row in result) {
+        elems.add(ElementCustom.fromJson(row['']));
       }
+      return elems;
+    } catch (e) {
+      throw DatabaseException('$e');
     }
-    if (elems.length > 1) {
-      elems.sort((a, b) => a.idOrder.compareTo(b.idOrder));
-    }
-    return elems;
   }
 
   /// SELECT ///
@@ -107,25 +102,12 @@ class API {
   Future<List<ElementCustom>> selectElements(Map json) async {
     try {
       var idSheet = json['id_sheet'];
-      List<dynamic> cb, img, txt, fC;
-      var requestCb = 'SELECT * FROM checkbox '
-          'WHERE id_sheet = $idSheet ORDER BY elem_order;';
-      cb = await db.queryWithResult(requestCb);
 
-      var requestImg = 'SELECT * FROM image WHERE '
-          'id_sheet = $idSheet ORDER BY elem_order;';
-      img = await db.queryWithResult(requestImg);
 
-      var requestTxt = 'SELECT * FROM text WHERE '
-          'id_sheet = $idSheet ORDER BY elem_order;';
-      txt = await db.queryWithResult(requestTxt);
+      var request = 'select * from get_elements($idSheet::bigint);';
+      var elems = await db.queryWithResult(request);
 
-      var requestFlashCard = 'SELECT * FROM flashcard WHERE '
-          'id_sheet = $idSheet ORDER BY elem_order;';
-      fC = await db.queryWithResult(requestFlashCard);
-
-      var elems = cb + img + txt + fC;
-      return _resultToElems(elems, idSheet);
+      return _resultToElems(elems);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectElements:\n$e');
     }
@@ -275,7 +257,7 @@ class API {
     try {
       var idElem = json['id'],
           isCheck = json['is_checked'],
-          text = json['text'];
+          text = json['cb_text'];
       var request =
           "CALL update_checkbox($idElem::bigint, $isCheck::boolean, '$text'::"
           "text);";
@@ -289,7 +271,7 @@ class API {
 
   Future<void> updateText(Map json) async {
     try {
-      var idElem = json['id'], text = json['text'];
+      var idElem = json['id'], text = json['txt_text'];
       var request = "CALL update_text($idElem::bigint, '$text'::text);";
       await db.query(request);
     } catch (e) {
