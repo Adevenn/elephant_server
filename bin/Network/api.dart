@@ -107,7 +107,7 @@ class API {
   Future<List<ElementCustom>> selectElements(Map json) async {
     try {
       var idSheet = json['id_sheet'];
-      List<dynamic> cb, img, txt;
+      List<dynamic> cb, img, txt, fC;
       var requestCb = 'SELECT * FROM checkbox '
           'WHERE id_sheet = $idSheet ORDER BY elem_order;';
       cb = await db.queryWithResult(requestCb);
@@ -120,7 +120,11 @@ class API {
           'id_sheet = $idSheet ORDER BY elem_order;';
       txt = await db.queryWithResult(requestTxt);
 
-      var elems = cb + img + txt;
+      var requestFlashCard = 'SELECT * FROM flashcard WHERE '
+          'id_sheet = $idSheet ORDER BY elem_order;';
+      fC = await db.queryWithResult(requestFlashCard);
+
+      var elems = cb + img + txt + fC;
       return _resultToElems(elems, idSheet);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectElements:\n$e');
@@ -247,8 +251,7 @@ class API {
           author = json['author'],
           isPublic = json['is_public'];
       var request =
-          "CALL update_cell($idCell::bigint, '$title'::text, '$subtitle'::tex"
-          "t), '$author'::text, $isPublic::boolean;";
+          "CALL update_cell($idCell::bigint, '$title'::text, '$subtitle'::text, '$author'::text, $isPublic::boolean);";
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.updateCell: Connection lost\n$e');
