@@ -89,17 +89,9 @@ class Server {
                   await _api.addText(json);
                   await _responseOK(request, 'text added correctly');
                   break;
-                case '/deleteCell':
-                  await _api.deleteCell(json);
-                  await _responseOK(request, 'cell deleted correctly');
-                  break;
-                case '/deleteSheet':
-                  await _api.deleteSheet(json);
-                  await _responseOK(request, 'sheet deleted correctly');
-                  break;
-                case '/deleteElement':
-                  await _api.deleteElement(json);
-                  await _responseOK(request, 'element deleted correctly');
+                case '/deleteItem':
+                  await _api.delete(json);
+                  await _responseOK(request, 'item deleted correctly');
                   break;
                 case '/updateCell':
                   await _api.updateCell(json);

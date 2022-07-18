@@ -15,46 +15,6 @@ class API {
     db = DB(username: username, password: password);
   }
 
-  ///DB values -> List<Cell>
-  List<Cell> _resultToCells(List<dynamic> result) {
-    try {
-      var cells = <Cell>[];
-      for (final row in result) {
-        cells.add(Cell.fromJson(row['cell']));
-      }
-      return cells;
-    } catch (e) {
-      print('ERROR IN RESULT TO CELL');
-      throw DatabaseException('$e');
-    }
-  }
-
-  ///DB values -> List<Sheet>
-  List<Sheet> _resultToSheets(List<dynamic> result) {
-    try {
-      var sheets = <Sheet>[];
-      for (final row in result) {
-        sheets.add(Sheet.fromJson(row['sheet']));
-      }
-      return sheets;
-    } catch (e) {
-      throw DatabaseException('$e');
-    }
-  }
-
-  ///DB values -> List<Element>
-  List<ElementCustom> _resultToElems(List<dynamic> result) {
-    try {
-      var elems = <ElementCustom>[];
-      for (final row in result) {
-        elems.add(ElementCustom.fromJson(row['']));
-      }
-      return elems;
-    } catch (e) {
-      throw DatabaseException('$e');
-    }
-  }
-
   /// SELECT ///
 
   ///Select cells from database that match with [matchWord]
@@ -65,7 +25,12 @@ class API {
       var request = "select * from cell where title LIKE '%$matchWord%' AND "
           "author = '$username' OR is_public = true ORDER BY title;";
       var result = await db.queryWithResult(request);
-      return _resultToCells(result);
+
+      var cells = <Cell>[];
+      for (final row in result) {
+        cells.add(Cell.fromJson(row['cell']));
+      }
+      return cells;
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectCells:\n$e');
     }
@@ -78,7 +43,12 @@ class API {
       var request = 'SELECT * FROM sheet WHERE '
           'id_cell = $idCell ORDER BY sheet_order;';
       var result = await db.queryWithResult(request);
-      return _resultToSheets(result);
+
+      var sheets = <Sheet>[];
+      for (final row in result) {
+        sheets.add(Sheet.fromJson(row['sheet']));
+      }
+      return sheets;
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectSheets\n$e');
     }
@@ -91,7 +61,6 @@ class API {
       var request = 'SELECT * FROM sheet WHERE id_cell = $idCell AND '
           'sheet_order = $sheetIndex;';
       var result = await db.queryWithResult(request);
-      print(result);
       return Sheet.fromJson(result[0]['sheet']);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectSheet\n$e');
@@ -102,12 +71,14 @@ class API {
   Future<List<ElementCustom>> selectElements(Map json) async {
     try {
       var idSheet = json['id_sheet'];
-
-
       var request = 'select * from get_elements($idSheet::bigint);';
-      var elems = await db.queryWithResult(request);
+      var result = await db.queryWithResult(request);
 
-      return _resultToElems(elems);
+      var elems = <ElementCustom>[];
+      for (final row in result) {
+        elems.add(ElementCustom.fromJson(row['']));
+      }
+      return elems;
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.selectElements:\n$e');
     }
@@ -190,38 +161,21 @@ class API {
     }
   }
 
+
   /// DELETE ///
 
-  Future<void> deleteCell(Map json) async {
-    try {
-      var idCell = json['id'];
-      var request = 'CALL delete_cell($idCell::bigint);';
+
+  Future<void> delete(Map json) async{
+    try{
+      var id = json['id'];
+      var type = json['item_type'];
+      var request = "CALL delete($id::bigint, '$type''::text);";
       await db.query(request);
-    } catch (e) {
-      throw DatabaseException('$_className.deleteCell: Connection lost\n$e');
+    } catch(e){
+      throw DatabaseException('$_className.delete: Connection lost\n$e');
     }
   }
 
-  Future<void> deleteSheet(Map json) async {
-    try {
-      var idSheet = json['id'];
-      print(idSheet);
-      var request = 'CALL delete_sheet($idSheet::bigint);';
-      await db.query(request);
-    } catch (e) {
-      throw DatabaseException('$_className.deleteSheet: Connection lost\n$e');
-    }
-  }
-
-  Future<void> deleteElement(Map json) async {
-    try {
-      var idElement = json['id'];
-      var request = 'CALL delete_element($idElement::bigint);';
-      await db.query(request);
-    } catch (e) {
-      throw DatabaseException('$_className.deleteElement:\n$e');
-    }
-  }
 
   /// UPDATE ///
 
