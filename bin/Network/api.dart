@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../Exception/database_exception.dart';
-import '../Model/cell.dart';
+import '../Model/Cells/cell.dart';
 import '../Model/Elements/element_custom.dart';
-import '../Model/Cells/Book/sheet.dart';
+import '../Model/Cells/sheet.dart';
 import 'data_db.dart';
 
 class API {
@@ -161,21 +161,18 @@ class API {
     }
   }
 
-
   /// DELETE ///
 
-
-  Future<void> delete(Map json) async{
-    try{
+  Future<void> delete(Map json) async {
+    try {
       var id = json['id'];
       var type = json['item_type'];
       var request = "CALL delete($id::bigint, '$type''::text);";
       await db.query(request);
-    } catch(e){
+    } catch (e) {
       throw DatabaseException('$_className.delete: Connection lost\n$e');
     }
   }
-
 
   /// UPDATE ///
 

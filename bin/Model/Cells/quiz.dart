@@ -1,26 +1,27 @@
 import 'cell.dart';
 
-class Ranking extends Cell {
-  Ranking(
+class Quiz extends Cell {
+  Quiz(
       {required int id,
       required String title,
-      String subtitle = '',
+      required String subtitle,
+      required String type,
       required String author,
       required bool isPublic})
       : super(
             id: id,
             title: title,
             subtitle: subtitle,
-            type: (Ranking).toString(),
+            type: type,
             author: author,
             isPublic: isPublic);
 
-  Ranking.fromJson(Map<String, dynamic> json)
+  Quiz.fromJson(Map<String, dynamic> json)
       : super(
             id: json['id_cell'],
             title: json['title'],
             subtitle: json['subtitle'],
-            type: (Ranking).toString(),
+            type: (Quiz).toString(),
             author: json['author'],
             isPublic: json['is_public']);
 }

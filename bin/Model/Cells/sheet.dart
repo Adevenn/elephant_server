@@ -1,5 +1,16 @@
-import '../../Elements/element_custom.dart';
+import '../Elements/element_custom.dart';
 
+/// int id,
+///
+/// int idParent,
+///
+/// String title,
+///
+/// String subtitle,
+///
+/// List elements,
+///
+/// int idOrder
 class Sheet{
   final int id;
   final int idParent;
@@ -12,11 +23,11 @@ class Sheet{
   Sheet(this.id, this.idParent, this.title, this.subtitle, this.idOrder);
 
   Sheet.fromJson(Map<String, dynamic> json)
-    : id = json['id_sheet'],
-      idParent = json['id_cell'],
-      title = json['title'],
-      subtitle = json['subtitle'],
-      idOrder = json['sheet_order'];
+      : id = json['id_sheet'],
+        idParent = json['id_cell'],
+        title = json['title'],
+        subtitle = json['subtitle'],
+        idOrder = json['sheet_order'];
 
   Map<String, dynamic> toJson() => {
     'id_sheet' : id,
