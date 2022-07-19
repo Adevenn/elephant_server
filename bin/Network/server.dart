@@ -63,6 +63,7 @@ class Server {
                   break;
                 case '/elements':
                   var elements = await _api.selectElements(json);
+                  print(jsonEncode(elements));
                   await _responseOK(request, jsonEncode(elements));
                   break;
                 case '/rawImage':
@@ -88,6 +89,10 @@ class Server {
                 case '/addText':
                   await _api.addText(json);
                   await _responseOK(request, 'text added correctly');
+                  break;
+                case '/addFlashcard':
+                  await _api.addFlashcard(json);
+                  await _responseOK(request, 'flashcard added correctly');
                   break;
                 case '/deleteItem':
                   await _api.delete(json);

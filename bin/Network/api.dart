@@ -157,7 +157,17 @@ class API {
       var request = 'CALL add_text($idSheet::bigint, $type::integer);';
       await db.query(request);
     } catch (e) {
-      throw DatabaseException('$_className.add_text: Connection lost\n$e');
+      throw DatabaseException('$_className.addText: Connection lost\n$e');
+    }
+  }
+
+  Future<void> addFlashcard(Map json) async {
+    try{
+      var idSheet = json['id_sheet'];
+      var request = 'CALL add_flashcard($idSheet::bigint);';
+      await db.query(request);
+    } catch(e){
+      throw DatabaseException('$_className.addFlashcard: Connection lost\n$e');
     }
   }
 
@@ -167,7 +177,7 @@ class API {
     try {
       var id = json['id'];
       var type = json['item_type'];
-      var request = "CALL delete($id::bigint, '$type''::text);";
+      var request = "CALL delete($id::bigint, '$type'::text);";
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.delete: Connection lost\n$e');

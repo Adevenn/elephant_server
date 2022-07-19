@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'flashcard_custom.dart';
 
@@ -47,11 +48,13 @@ abstract class ElementCustom {
             image: Uint8List.fromList(json['img'].cast<int>()),
             idOrder: json['elem_order']);
       case 'FlashcardCustom':
+        print('front : ${json['front'] as List<String>}\n'
+            'back : ${json['back'] as List<String>}');
         return FlashcardCustom(
             id: json['id'],
             idSheet: json['id_sheet'],
-            front: json['front'],
-            back: json['back'],
+            front: json['front'] as List<String>,
+            back: json['back'] as List<String>,
             idOrder: json['elem_order']);
       default:
         throw Exception('Json with wrong element type');
