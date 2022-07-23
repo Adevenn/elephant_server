@@ -85,7 +85,7 @@ class API {
   }
 
   ///Select image from database that match with [id_img]
-  Future<String> selectRawImage(Map json) async {
+  Future<List<int>> selectRawImage(Map json) async {
     try {
       var idImg = json['id_img'];
       var request = 'SELECT image_raw FROM image WHERE id = $idImg;';
