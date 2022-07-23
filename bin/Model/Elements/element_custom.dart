@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'flashcard_custom.dart';
 
 import 'rank_custom.dart';
@@ -26,14 +25,11 @@ abstract class ElementCustom {
             text: json['cb_text'],
             idOrder: json['elem_order']);
       case 'ImageCustom':
-        var preview = jsonDecode(json['img_preview']);
-        var raw = jsonDecode(json['img_raw']);
-        print(preview['preview'].runtimeType);
         return ImageCustom(
             id: json['id'],
             idParent: json['id_sheet'],
-            imgPreview: Uint8List.fromList(preview['preview'].cast<int>()),
-            imgRaw: Uint8List.fromList(raw['raw'].cast<int>()),
+            imgPreview: json['img_preview'],
+            imgRaw: json['img_raw'],
             idOrder: json['elem_order']);
       case 'TextCustom':
         return TextCustom(
@@ -48,7 +44,7 @@ abstract class ElementCustom {
             idParent: json['id_sheet'],
             title: json['title'],
             description: json['description'],
-            image: Uint8List.fromList(json['img'].cast<int>()),
+            image: json['img'],
             idOrder: json['elem_order']);
       case 'FlashcardCustom':
         print('front : ${json['front'] as List<String>}\n'
@@ -56,8 +52,8 @@ abstract class ElementCustom {
         return FlashcardCustom(
             id: json['id'],
             idSheet: json['id_sheet'],
-            front: json['front'] as List<String>,
-            back: json['back'] as List<String>,
+            front: List<String>.from(json['front']),
+            back: List<String>.from(json['back']),
             idOrder: json['elem_order']);
       default:
         throw Exception('Json with wrong element type');

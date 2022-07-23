@@ -141,10 +141,14 @@ class API {
   Future<void> addImage(Map json) async {
     try {
       var idSheet = json['id_sheet'];
-      var imgPreview = jsonEncode({'preview': json['img_preview']});
-      var imgRaw = jsonEncode({'raw': json['img_raw']});
-      var request = "CALL add_image($idSheet::bigint, '$imgPreview'::text"
-          ", '$imgRaw'::text);";
+      //Postgresql needs '{' and '}' to to delimit an array
+      var preview = json['img_preview']
+          .toString()
+          .replaceAll('[', '{')
+          .replaceAll(']', '}');
+      var raw =
+          json['img_raw'].toString().replaceAll('[', '{').replaceAll(']', '}');
+      var request = "CALL add_image($idSheet, '$preview', '$raw');";
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.addImage: Connection lost\n$e');
@@ -162,11 +166,11 @@ class API {
   }
 
   Future<void> addFlashcard(Map json) async {
-    try{
+    try {
       var idSheet = json['id_sheet'];
       var request = 'CALL add_flashcard($idSheet::bigint);';
       await db.query(request);
-    } catch(e){
+    } catch (e) {
       throw DatabaseException('$_className.addFlashcard: Connection lost\n$e');
     }
   }
@@ -243,7 +247,7 @@ class API {
   Future<void> updateSheetOrder(Map json) async {
     try {
       var sheets = List<Sheet>.from(json['sheet_order']
-          .map((model) => Sheet.fromJson(jsonDecode(model))));
+          .map((sheet) => Sheet.fromJson(jsonDecode(sheet))));
       for (var i = 0; i < sheets.length; i++) {
         if (sheets[i].idOrder != i) {
           var request =
@@ -259,7 +263,7 @@ class API {
   Future<void> updateElementOrder(Map json) async {
     try {
       var elements = List<ElementCustom>.from(json['elem_order']
-          .map((model) => ElementCustom.fromJson(jsonDecode(model))));
+          .map((elem) => ElementCustom.fromJson(jsonDecode(elem))));
       for (var i = 0; i < elements.length; i++) {
         if (elements[i].idOrder != i) {
           var request =

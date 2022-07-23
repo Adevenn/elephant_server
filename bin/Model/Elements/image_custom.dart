@@ -4,8 +4,7 @@ import 'dart:typed_data';
 import 'element_custom.dart';
 
 class ImageCustom extends ElementCustom {
-  Uint8List imgPreview;
-  Uint8List imgRaw;
+  List<int> imgPreview, imgRaw;
 
   ImageCustom(
       {required int id,

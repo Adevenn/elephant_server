@@ -1,10 +1,9 @@
-import 'dart:typed_data';
 import 'element_custom.dart';
 
 class RankCustom extends ElementCustom {
   String title;
   String description;
-  Uint8List image;
+  List<int> image;
 
   RankCustom({required int id,
     required int idParent,

@@ -31,7 +31,7 @@ class Server {
           request.headers.contentType?.mimeType == 'application/json') {
         try {
           var requestJson = jsonDecode(await utf8.decoder.bind(request).join());
-          print(requestJson);
+          //print(requestJson);
           var username = requestJson['username'];
           var password = requestJson['password'];
           if (request.requestedUri.path == '/add_account') {
