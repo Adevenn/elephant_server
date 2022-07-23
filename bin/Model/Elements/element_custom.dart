@@ -26,11 +26,14 @@ abstract class ElementCustom {
             text: json['cb_text'],
             idOrder: json['elem_order']);
       case 'ImageCustom':
+        var preview = jsonDecode(json['img_preview']);
+        var raw = jsonDecode(json['img_raw']);
+        print(preview['preview'].runtimeType);
         return ImageCustom(
             id: json['id'],
             idParent: json['id_sheet'],
-            imgPreview: Uint8List.fromList(json['img_preview'].cast<int>()),
-            imgRaw: Uint8List.fromList(json['img_raw'].cast<int>()),
+            imgPreview: Uint8List.fromList(preview['preview'].cast<int>()),
+            imgRaw: Uint8List.fromList(raw['raw'].cast<int>()),
             idOrder: json['elem_order']);
       case 'TextCustom':
         return TextCustom(

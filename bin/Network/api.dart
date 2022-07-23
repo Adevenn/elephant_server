@@ -141,8 +141,8 @@ class API {
   Future<void> addImage(Map json) async {
     try {
       var idSheet = json['id_sheet'];
-      var imgPreview = jsonEncode({'img_preview': json['img_preview']});
-      var imgRaw = jsonEncode({'img_raw': json['img_raw']});
+      var imgPreview = jsonEncode({'preview': json['img_preview']});
+      var imgRaw = jsonEncode({'raw': json['img_raw']});
       var request = "CALL add_image($idSheet::bigint, '$imgPreview'::text"
           ", '$imgRaw'::text);";
       await db.query(request);
