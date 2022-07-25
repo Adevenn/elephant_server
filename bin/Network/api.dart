@@ -20,7 +20,6 @@ class API {
   ///Select cells from database that match with [matchWord]
   Future<List<Cell>> selectCells(String username, Map json) async {
     try {
-      print('username : $username');
       var matchWord = json['match_word'];
       var request = "select * from cell where title LIKE '%$matchWord%' AND "
           "author = '$username' OR is_public = true ORDER BY title;";
@@ -85,12 +84,12 @@ class API {
   }
 
   ///Select image from database that match with [id_img]
-  Future<List<int>> selectRawImage(Map json) async {
+  Future<Map> selectRawImage(Map json) async {
     try {
       var idImg = json['id_img'];
       var request = 'SELECT image_raw FROM image WHERE id = $idImg;';
       var rawImg = await db.queryWithResult(request);
-      return rawImg[0]['image']['image_raw'];
+      return rawImg[0]['image'];
     } catch (e) {
       throw Exception('$_className.selectRawImage:\n$e');
     }

@@ -63,7 +63,6 @@ class Server {
                   break;
                 case '/elements':
                   var elements = await _api.selectElements(json);
-                  print(jsonEncode(elements));
                   await _responseOK(request, jsonEncode(elements));
                   break;
                 case '/rawImage':
