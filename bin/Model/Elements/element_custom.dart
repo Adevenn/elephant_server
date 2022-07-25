@@ -28,8 +28,8 @@ abstract class ElementCustom {
         return ImageCustom(
             id: json['id'],
             idParent: json['id_sheet'],
-            imgPreview: json['img_preview'],
-            imgRaw: json['img_raw'],
+            imgPreview: json['img_preview'].cast<int>(),
+            imgRaw: json['img_raw'].cast<int>(),
             idOrder: json['elem_order']);
       case 'TextCustom':
         return TextCustom(
@@ -47,8 +47,8 @@ abstract class ElementCustom {
             image: json['img'],
             idOrder: json['elem_order']);
       case 'FlashcardCustom':
-        print('front : ${json['front'] as List<String>}\n'
-            'back : ${json['back'] as List<String>}');
+        print('front : ${List<String>.from(json['front'])}\n'
+            'back : ${List<String>.from(json['back'])}');
         return FlashcardCustom(
             id: json['id'],
             idSheet: json['id_sheet'],
