@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'element_custom.dart';
 
 class ImageCustom extends ElementCustom {
@@ -23,5 +20,4 @@ class ImageCustom extends ElementCustom {
         'elem_order': idOrder,
         'elem_type': runtimeType.toString(),
       };
-
 }

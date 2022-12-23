@@ -15,8 +15,6 @@ class API {
     db = DB(username: username, password: password);
   }
 
-  /// SELECT ///
-
   ///Select cells from database that match with [matchWord]
   Future<List<Cell>> selectCells(String username, Map json) async {
     try {
@@ -95,8 +93,6 @@ class API {
     }
   }
 
-  /// ADD ///
-
   Future<void> addCell(Map json) async {
     try {
       var title = json['title'],
@@ -112,13 +108,10 @@ class API {
     }
   }
 
-  Future<void> addSheet(Map json) async {
+  Future<void> addPage(Map json) async {
     try {
-      var idCell = json['id_cell'],
-          title = json['title'],
-          subtitle = json['subtitle'];
-      var request =
-          "select add_sheet($idCell::bigint, '$title'::text, '$subtitle'::text);";
+      var idCell = json['id_cell'];
+      var request = 'select add_page($idCell::bigint);';
       await db.query(request);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.addSheet: Wrong entries\n$e');
@@ -174,8 +167,6 @@ class API {
     }
   }
 
-  /// DELETE ///
-
   Future<void> delete(Map json) async {
     try {
       var id = json['id'];
@@ -186,8 +177,6 @@ class API {
       throw DatabaseException('$_className.delete: Connection lost\n$e');
     }
   }
-
-  /// UPDATE ///
 
   Future<void> updateCell(Map json) async {
     try {
@@ -224,7 +213,7 @@ class API {
           text = json['cb_text'];
       var request =
           "CALL update_checkbox($idElem::bigint, $isCheck::boolean, '$text'::"
-          "text);";
+          'text);';
       await db.query(request);
     } catch (e) {
       print('ERROR UPDATE CB : $e');
@@ -243,10 +232,10 @@ class API {
     }
   }
 
-  Future<void> updateSheetOrder(Map json) async {
+  Future<void> updatePageOrder(Map json) async {
     try {
-      var sheets = List<Sheet>.from(json['sheet_order']
-          .map((sheet) => Sheet.fromJson(jsonDecode(sheet))));
+      var sheets = List<Sheet>.from(
+          json['page_order'].map((sheet) => Sheet.fromJson(jsonDecode(sheet))));
       for (var i = 0; i < sheets.length; i++) {
         if (sheets[i].idOrder != i) {
           var request =
@@ -255,7 +244,7 @@ class API {
         }
       }
     } catch (e) {
-      throw DatabaseException('$_className.updateSheetOrder:\n$e');
+      throw DatabaseException('$_className.updatePageOrder:\n$e');
     }
   }
 

@@ -73,8 +73,8 @@ class Server {
                   await _api.addCell(json);
                   await _responseOK(request, 'cell added correctly');
                   break;
-                case '/addSheet':
-                  await _api.addSheet(json);
+                case '/addPage':
+                  await _api.addPage(json);
                   await _responseOK(request, 'sheet added correctly');
                   break;
                 case '/addCheckbox':
@@ -113,9 +113,9 @@ class Server {
                   await _api.updateText(json);
                   await _responseOK(request, 'text updated correctly');
                   break;
-                case '/updateSheetOrder':
-                  await _api.updateSheetOrder(json);
-                  await _responseOK(request, 'sheet order updated correctly');
+                case '/updatePageOrder':
+                  await _api.updatePageOrder(json);
+                  await _responseOK(request, 'page order updated correctly');
                   break;
                 case '/updateElementOrder':
                   await _api.updateElementOrder(json);

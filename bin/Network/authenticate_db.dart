@@ -11,7 +11,7 @@ class AuthenticateDB {
   AuthenticateDB({required this.authUsername, required this.authPwd});
 
   Future<void> tryAddAccount(String username, String password) async {
-    try{
+    try {
       var hashPwd = Hash.hashString(password);
       var connection = PostgreSQLConnection(
           Constants.authIP, Constants.authPort, Constants.authName,
@@ -21,7 +21,7 @@ class AuthenticateDB {
           "CALL add_account('$username', '${hashPwd['hash_pwd']}', '${hashPwd['salt']}');";
       await connection.mappedResultsQuery(request);
       await connection.close();
-    } catch(e){
+    } catch (e) {
       print(e);
       throw DatabaseException('AuthenticateDB.tryAddAccount:\n$e');
     }
