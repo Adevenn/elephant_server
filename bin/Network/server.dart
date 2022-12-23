@@ -54,12 +54,12 @@ class Server {
                   await _responseOK(request, jsonEncode(cells));
                   break;
                 case '/sheets':
-                  var sheets = await _api.selectSheets(json);
-                  await _responseOK(request, jsonEncode(sheets));
+                  var pages = await _api.selectPages(json);
+                  await _responseOK(request, jsonEncode(pages));
                   break;
                 case '/sheet':
-                  var sheet = await _api.selectSheet(json);
-                  await _responseOK(request, jsonEncode(sheet));
+                  var page = await _api.selectPage(json);
+                  await _responseOK(request, jsonEncode(page));
                   break;
                 case '/elements':
                   var elements = await _api.selectElements(json);
@@ -75,7 +75,7 @@ class Server {
                   break;
                 case '/addPage':
                   await _api.addPage(json);
-                  await _responseOK(request, 'sheet added correctly');
+                  await _responseOK(request, 'page added correctly');
                   break;
                 case '/addCheckbox':
                   await _api.addCheckbox(json);
@@ -102,8 +102,8 @@ class Server {
                   await _responseOK(request, 'cell updated correctly');
                   break;
                 case '/updateSheet':
-                  await _api.updateSheet(json);
-                  await _responseOK(request, 'sheet updated correctly');
+                  await _api.updatePage(json);
+                  await _responseOK(request, 'page updated correctly');
                   break;
                 case '/updateCheckbox':
                   await _api.updateCheckbox(json);

@@ -11,7 +11,7 @@ import '../Elements/element_custom.dart';
 /// List elements,
 ///
 /// int idOrder
-class Sheet{
+class Page{
   final int id;
   final int idParent;
   String title;
@@ -20,9 +20,9 @@ class Sheet{
   int get elemCount => elements.length;
   int idOrder;
 
-  Sheet(this.id, this.idParent, this.title, this.subtitle, this.idOrder);
+  Page(this.id, this.idParent, this.title, this.subtitle, this.idOrder);
 
-  Sheet.fromJson(Map<String, dynamic> json)
+  Page.fromJson(Map<String, dynamic> json)
       : id = json['id_sheet'],
         idParent = json['id_cell'],
         title = json['title'],

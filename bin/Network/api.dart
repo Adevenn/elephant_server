@@ -4,7 +4,7 @@ import 'dart:convert';
 import '../Exception/database_exception.dart';
 import '../Model/Cells/cell.dart';
 import '../Model/Elements/element_custom.dart';
-import '../Model/Cells/sheet.dart';
+import '../Model/Cells/page.dart';
 import 'data_db.dart';
 
 class API {
@@ -33,34 +33,34 @@ class API {
     }
   }
 
-  ///Select sheets from database that match with [id_cell]
-  Future<List<Sheet>> selectSheets(Map json) async {
+  ///Select pages from database that match with [id_cell]
+  Future<List<Page>> selectPages(Map json) async {
     try {
       var idCell = json['id_cell'];
       var request = 'SELECT * FROM sheet WHERE '
           'id_cell = $idCell ORDER BY sheet_order;';
       var result = await db.queryWithResult(request);
 
-      var sheets = <Sheet>[];
+      var pages = <Page>[];
       for (final row in result) {
-        sheets.add(Sheet.fromJson(row['sheet']));
+        pages.add(Page.fromJson(row['sheet']));
       }
-      return sheets;
+      return pages;
     } on DatabaseException catch (e) {
-      throw DatabaseException('$_className.selectSheets\n$e');
+      throw DatabaseException('$_className.selectPages\n$e');
     }
   }
 
   ///Select sheet from database that match with [id_cell] and [sheet_index]
-  Future<Sheet> selectSheet(Map json) async {
+  Future<Page> selectPage(Map json) async {
     try {
-      var idCell = json['id_cell'], sheetIndex = json['sheet_index'];
+      var idCell = json['id_cell'], pageIndex = json['sheet_index'];
       var request = 'SELECT * FROM sheet WHERE id_cell = $idCell AND '
-          'sheet_order = $sheetIndex;';
+          'sheet_order = $pageIndex;';
       var result = await db.queryWithResult(request);
-      return Sheet.fromJson(result[0]['sheet']);
+      return Page.fromJson(result[0]['sheet']);
     } on DatabaseException catch (e) {
-      throw DatabaseException('$_className.selectSheet\n$e');
+      throw DatabaseException('$_className.selectPage\n$e');
     }
   }
 
@@ -114,16 +114,16 @@ class API {
       var request = 'select add_page($idCell::bigint);';
       await db.query(request);
     } on DatabaseException catch (e) {
-      throw DatabaseException('$_className.addSheet: Wrong entries\n$e');
+      throw DatabaseException('$_className.addPage: Wrong entries\n$e');
     } catch (e) {
-      throw DatabaseException('$_className.addSheet: Connection lost\n$e');
+      throw DatabaseException('$_className.addPage: Connection lost\n$e');
     }
   }
 
   Future<void> addCheckbox(Map json) async {
     try {
-      var idSheet = json['id_sheet'];
-      var request = 'CALL add_checkbox($idSheet::bigint);';
+      var idPage = json['id_sheet'];
+      var request = 'CALL add_checkbox($idPage::bigint);';
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.addCheckbox: Connection lost\n$e');
@@ -132,7 +132,7 @@ class API {
 
   Future<void> addImage(Map json) async {
     try {
-      var idSheet = json['id_sheet'];
+      var idPage = json['id_sheet'];
       //Postgresql needs '{' and '}' to to delimit an array
       var preview = json['img_preview']
           .toString()
@@ -140,7 +140,7 @@ class API {
           .replaceAll(']', '}');
       var raw =
           json['img_raw'].toString().replaceAll('[', '{').replaceAll(']', '}');
-      var request = "CALL add_image($idSheet, '$preview', '$raw');";
+      var request = "CALL add_image($idPage, '$preview', '$raw');";
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.addImage: Connection lost\n$e');
@@ -149,8 +149,8 @@ class API {
 
   Future<void> addText(Map json) async {
     try {
-      var idSheet = json['id_sheet'], type = json['txt_type'];
-      var request = 'CALL add_text($idSheet::bigint, $type::integer);';
+      var idPage = json['id_sheet'], type = json['txt_type'];
+      var request = 'CALL add_text($idPage::bigint, $type::integer);';
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.addText: Connection lost\n$e');
@@ -159,8 +159,8 @@ class API {
 
   Future<void> addFlashcard(Map json) async {
     try {
-      var idSheet = json['id_sheet'];
-      var request = 'CALL add_flashcard($idSheet::bigint);';
+      var idPage = json['id_sheet'];
+      var request = 'CALL add_flashcard($idPage::bigint);';
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.addFlashcard: Connection lost\n$e');
@@ -193,16 +193,16 @@ class API {
     }
   }
 
-  Future<void> updateSheet(Map json) async {
+  Future<void> updatePage(Map json) async {
     try {
-      var idSheet = json['id_sheet'],
+      var idPage = json['id_sheet'],
           title = json['title'],
           subtitle = json['subtitle'];
       var request =
-          "CALL update_sheet($idSheet::bigint, '$title'::text, '$subtitle'::text);";
+          "CALL update_sheet($idPage::bigint, '$title'::text, '$subtitle'::text);";
       await db.query(request);
     } catch (e) {
-      throw DatabaseException('$_className.updateSheet: Connection lost\n$e');
+      throw DatabaseException('$_className.updatePage: Connection lost\n$e');
     }
   }
 
@@ -234,12 +234,12 @@ class API {
 
   Future<void> updatePageOrder(Map json) async {
     try {
-      var sheets = List<Sheet>.from(
-          json['page_order'].map((sheet) => Sheet.fromJson(jsonDecode(sheet))));
-      for (var i = 0; i < sheets.length; i++) {
-        if (sheets[i].idOrder != i) {
+      var pages = List<Page>.from(
+          json['page_order'].map((page) => Page.fromJson(jsonDecode(page))));
+      for (var i = 0; i < pages.length; i++) {
+        if (pages[i].idOrder != i) {
           var request =
-              'CALL update_sheet_order(${sheets[i].id}::bigint, $i::int);';
+              'CALL update_sheet_order(${pages[i].id}::bigint, $i::int);';
           await db.query(request);
         }
       }
