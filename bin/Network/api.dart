@@ -100,8 +100,7 @@ class API {
           type = json['type'],
           author = json['author'],
           isPublic = json['is_public'];
-      var request =
-          "CALL add_cell('$title', '$subtitle', '$type', '$author', $isPublic::boolean);";
+      var request = "CALL add_cell('$title', '$subtitle', '$type', '$author', $isPublic::boolean);";
       await db.query(request);
     } on DatabaseException catch (e) {
       throw DatabaseException('$_className.addCell:\n$e');
@@ -134,12 +133,8 @@ class API {
     try {
       var idPage = json['id_sheet'];
       //Postgresql needs '{' and '}' to to delimit an array
-      var preview = json['img_preview']
-          .toString()
-          .replaceAll('[', '{')
-          .replaceAll(']', '}');
-      var raw =
-          json['img_raw'].toString().replaceAll('[', '{').replaceAll(']', '}');
+      var preview = json['img_preview'].toString().replaceAll('[', '{').replaceAll(']', '}');
+      var raw = json['img_raw'].toString().replaceAll('[', '{').replaceAll(']', '}');
       var request = "CALL add_image($idPage, '$preview', '$raw');";
       await db.query(request);
     } catch (e) {
@@ -195,11 +190,8 @@ class API {
 
   Future<void> updatePage(Map json) async {
     try {
-      var idPage = json['id_sheet'],
-          title = json['title'],
-          subtitle = json['subtitle'];
-      var request =
-          "CALL update_sheet($idPage::bigint, '$title'::text, '$subtitle'::text);";
+      var idPage = json['id_sheet'], title = json['title'], subtitle = json['subtitle'];
+      var request = "CALL update_sheet($idPage::bigint, '$title'::text, '$subtitle'::text);";
       await db.query(request);
     } catch (e) {
       throw DatabaseException('$_className.updatePage: Connection lost\n$e');
@@ -208,17 +200,13 @@ class API {
 
   Future<void> updateCheckbox(Map json) async {
     try {
-      var idElem = json['id'],
-          isCheck = json['is_checked'],
-          text = json['cb_text'];
-      var request =
-          "CALL update_checkbox($idElem::bigint, $isCheck::boolean, '$text'::"
+      var idElem = json['id'], isCheck = json['is_checked'], text = json['cb_text'];
+      var request = "CALL update_checkbox($idElem::bigint, $isCheck::boolean, '$text'::"
           'text);';
       await db.query(request);
     } catch (e) {
       print('ERROR UPDATE CB : $e');
-      throw DatabaseException(
-          '$_className.updateCheckbox: Connection lost\n$e');
+      throw DatabaseException('$_className.updateCheckbox: Connection lost\n$e');
     }
   }
 
@@ -234,12 +222,10 @@ class API {
 
   Future<void> updatePageOrder(Map json) async {
     try {
-      var pages = List<Page>.from(
-          json['page_order'].map((page) => Page.fromJson(jsonDecode(page))));
+      var pages = List<Page>.from(json['page_order'].map((page) => Page.fromJson(jsonDecode(page))));
       for (var i = 0; i < pages.length; i++) {
         if (pages[i].idOrder != i) {
-          var request =
-              'CALL update_sheet_order(${pages[i].id}::bigint, $i::int);';
+          var request = 'CALL update_sheet_order(${pages[i].id}::bigint, $i::int);';
           await db.query(request);
         }
       }
@@ -250,12 +236,10 @@ class API {
 
   Future<void> updateElementOrder(Map json) async {
     try {
-      var elements = List<ElementCustom>.from(json['elem_order']
-          .map((elem) => ElementCustom.fromJson(jsonDecode(elem))));
+      var elements = List<ElementCustom>.from(json['elem_order'].map((elem) => ElementCustom.fromJson(jsonDecode(elem))));
       for (var i = 0; i < elements.length; i++) {
         if (elements[i].idOrder != i) {
-          var request =
-              'CALL update_element_order(${elements[i].id}::bigint, $i::int);';
+          var request = 'CALL update_element_order(${elements[i].id}::bigint, $i::int);';
           await db.query(request);
         }
       }
