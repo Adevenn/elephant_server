@@ -11,13 +11,15 @@ class Server {
   late final API _api;
   late final AuthenticateDB _authDB;
 
-  Server(String authUsername, String authPassword, String dataUsername, String dataPassword) {
+  Server(String authUsername, String authPassword, String dataUsername,
+      String dataPassword) {
     _authDB = AuthenticateDB(authUsername: authUsername, authPwd: authPassword);
     _api = API(dataUsername, dataPassword);
   }
 
   void start() async {
-    var server = await HttpServer.bind(Constants.serverIP, Constants.serverPort);
+    var server =
+        await HttpServer.bind(Constants.serverIP, Constants.serverPort);
     //https
     /*var server = await HttpServer.bindSecure('127.0.0.1', 443,
         SecurityContext());*/
@@ -25,7 +27,8 @@ class Server {
 
     await for (HttpRequest request in server) {
       print('/* NEW REQUEST : ${request.requestedUri.path} */');
-      if (request.method == 'POST' && request.headers.contentType?.mimeType == 'application/json') {
+      if (request.method == 'POST' &&
+          request.headers.contentType?.mimeType == 'application/json') {
         try {
           var requestJson = jsonDecode(await utf8.decoder.bind(request).join());
           //print(requestJson);
@@ -33,14 +36,14 @@ class Server {
           var password = requestJson['password'];
           if (request.requestedUri.path == '/add_account') {
             try {
-              await _authDB.tryAddAccount(username, password);
+              await _authDB.addAccount(username, password);
               await _responseOK(request, 'Add account success');
             } catch (e) {
               throw DatabaseException();
             }
           } else {
             try {
-              await _authDB.trySignIn(username, password);
+              await _authDB.signIn(username, password);
               var json = jsonDecode(requestJson['json']);
               switch (request.requestedUri.path) {
                 case '/sign_in':

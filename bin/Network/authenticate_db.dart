@@ -10,7 +10,7 @@ class AuthenticateDB {
 
   AuthenticateDB({required this.authUsername, required this.authPwd});
 
-  Future<void> tryAddAccount(String username, String password) async {
+  Future<void> addAccount(String username, String password) async {
     try {
       var hashPwd = Hash.hashString(password);
       var connection = PostgreSQLConnection(
@@ -27,7 +27,7 @@ class AuthenticateDB {
     }
   }
 
-  Future<void> trySignIn(String username, String password) async {
+  Future<void> signIn(String username, String password) async {
     try {
       var connection = PostgreSQLConnection(
           Constants.authIP, Constants.authPort, Constants.authName,
@@ -46,7 +46,7 @@ class AuthenticateDB {
       await connection.close();
     } catch (e) {
       print(e);
-      throw DatabaseException('AuthenticateDB.trySignIn:\n$e');
+      throw DatabaseException('AuthenticateDB.signIn:\n$e');
     }
   }
 }
